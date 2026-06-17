@@ -372,19 +372,16 @@
   @media (max-width: 560px) { .searchrow { flex-direction: column; } .searchbtn { width: 100%; } }
 
   /* profile: chain selector */
-  .chainsel { margin-bottom: 14px; }
-  .chainsel-lbl { font-family: var(--display); font-weight: 700; font-size: 17px; margin: 0 0 7px; }
-  .chainsel-opts { display: flex; gap: 8px; flex-wrap: wrap; }
   .chainopt { display: inline-flex; align-items: center; gap: 6px; font-family: var(--hand); font-size: 14px; color: var(--ink);
     border: 2px solid var(--ink); background: #fff; padding: 7px 12px; border-radius: var(--wobbly-sm); box-shadow: 2px 2px 0 var(--ink);
     cursor: pointer; transition: transform .1s, box-shadow .1s, background .1s; }
   .chainopt:hover { transform: translate(1px,1px); box-shadow: 1px 1px 0 var(--ink); }
   .chainopt.sel { background: var(--green); color: #fff; }
-  .chainopt svg { width: 15px; height: 15px; }
-  .chain-note { font-size: 13px; color: var(--red); margin-top: 8px; min-height: 16px; font-family: var(--hand); }
 
 
   /* profile share + social proof + viral footer */
+  .copy-addr { font-family: var(--hand); font-size: 12px; color: var(--ink); background: none; border: 2px solid var(--ink); border-radius: var(--wobbly-sm); padding: 2px 8px; cursor: pointer; margin-left: 5px; box-shadow: 2px 2px 0 var(--ink); transition: transform .1s, box-shadow .1s, background .1s; }
+  .copy-addr:hover { background: var(--yellow); transform: translate(1px,1px); box-shadow: 1px 1px 0 var(--ink); }
   .pf-expiry { margin-top: 10px; font-size: 14px; color: #6b6b6b; }
   .pf-expiry b { font-family: var(--display); font-weight: 700; color: var(--ink); }
   .pf-keptalive { display: inline-flex; align-items: center; gap: 7px; font-size: 14px; color: #6b6b6b; margin-top: 14px;
@@ -439,14 +436,7 @@
       <div><h1>namepass</h1><p>for names worth keeping</p></div>
     </a>
     <div class="nav-right">
-      <div class="netwrap" id="netWrap" style="display:none; position:relative;">
-        <button class="chip" id="netChip" type="button">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M12 2l9 5v10l-9 5-9-5V7l9-5z" stroke="#2d2d2d" stroke-width="2" stroke-linejoin="round"/></svg>
-          <span id="netLabel">Arbitrum</span>
-          <svg viewBox="0 0 24 24" fill="none" style="width:13px;height:13px"><path d="M6 9l6 6 6-6" stroke="#2d2d2d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        <div class="netmenu" id="netMenu" style="display:none;"></div>
-      </div>
+
       <button class="btn" id="connectBtn">Connect wallet</button>
     </div>
   </nav>
@@ -469,6 +459,7 @@
         <span class="chainbadge" title="Base"><svg class="base-logo" viewBox="0 0 1280 1280" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M0,101.12c0-34.64,0-51.95,6.53-65.28,6.25-12.76,16.56-23.07,29.32-29.32C49.17,0,66.48,0,101.12,0h1077.76c34.63,0,51.96,0,65.28,6.53,12.75,6.25,23.06,16.56,29.32,29.32,6.52,13.32,6.52,30.64,6.52,65.28v1077.76c0,34.63,0,51.96-6.52,65.28-6.26,12.75-16.57,23.06-29.32,29.32-13.32,6.52-30.65,6.52-65.28,6.52H101.12c-34.64,0-51.95,0-65.28-6.52-12.76-6.26-23.07-16.57-29.32-29.32-6.53-13.32-6.53-30.65-6.53-65.28V101.12Z" fill="#0052FF"/></svg> Base</span>
         <span class="chainbadge" title="Polygon"><svg viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="#8247E5" d="M377.3,163.9c-9.2-5.4-21.2-5.4-31.4,0l-72,41.7l-48.9,27.2l-72,41.7c-9.2,5.4-21.2,5.4-31.4,0l-57.2-32.6 c-9.2-5.4-15.7-15.4-15.7-26.3v-64.3c0-10.9,5.5-20.8,15.7-26.3l56.3-31.7c9.2-5.4,21.2-5.4,31.4,0l56.3,31.7 c9.2,5.4,15.7,15.4,15.7,26.3v41.7l48.9-28.1v-41.7c0-10.9-5.5-20.8-15.7-26.3L153.1,37.1c-9.2-5.4-21.2-5.4-31.4,0L15.7,96.9 C5.5,102.3,0,112.3,0,123.2v120.5c0,10.9,5.5,20.8,15.7,26.3l106.1,59.8c9.2,5.4,21.2,5.4,31.4,0l72-40.8l48.9-28.1l72-40.8 c9.2-5.4,21.2-5.4,31.4,0l56.3,31.7c9.2,5.4,15.7,15.4,15.7,26.3v64.3c0,10.9-5.5,20.8-15.7,26.3l-56.3,32.6 c-9.2,5.4-21.2,5.4-31.4,0l-56.3-31.7c-9.2-5.4-15.7-15.4-15.7-26.3v-41.7l-48.9,28.1v41.7c0,10.9,5.5,20.8,15.7,26.3l106.1,59.8 c9.2,5.4,21.2,5.4,31.4,0l106.1-59.8c9.2-5.4,15.7-15.4,15.7-26.3V250.9c0-10.9-5.5-20.8-15.7-26.3L377.3,163.9z"/></svg> Polygon</span>
         <span class="chainbadge" title="Optimism"><svg viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="250" cy="250" r="250" fill="#FF0420"/> <path d="M177.133 316.446C162.247 316.446 150.051 312.943 140.544 305.938C131.162 298.808 126.471 288.676 126.471 275.541C126.471 272.789 126.784 269.411 127.409 265.408C129.036 256.402 131.35 245.581 134.352 232.947C142.858 198.547 164.812 181.347 200.213 181.347C209.845 181.347 218.476 182.973 226.107 186.225C233.738 189.352 239.742 194.106 244.12 200.486C248.498 206.74 250.688 214.246 250.688 223.002C250.688 225.629 250.375 228.944 249.749 232.947C247.873 244.08 245.621 254.901 242.994 265.408C238.616 282.546 231.048 295.368 220.29 303.874C209.532 312.255 195.147 316.446 177.133 316.446ZM179.76 289.426C186.766 289.426 192.707 287.362 197.586 283.234C202.59 279.106 206.155 272.789 208.281 264.283C211.158 252.524 213.348 242.266 214.849 233.51C215.349 230.883 215.599 228.194 215.599 225.441C215.599 214.058 209.657 208.366 197.774 208.366C190.768 208.366 184.764 210.43 179.76 214.558C174.882 218.687 171.379 225.004 169.253 233.51C167.001 241.891 164.749 252.149 162.498 264.283C161.997 266.784 161.747 269.411 161.747 272.163C161.747 283.672 167.752 289.426 179.76 289.426Z" fill="white"/> <path d="M259.303 314.57C257.927 314.57 256.863 314.132 256.113 313.256C255.487 312.255 255.3 311.13 255.55 309.879L281.444 187.914C281.694 186.538 282.382 185.412 283.508 184.536C284.634 183.661 285.822 183.223 287.073 183.223H336.985C350.87 183.223 362.003 186.1 370.384 191.854C378.891 197.609 383.144 205.927 383.144 216.81C383.144 219.937 382.769 223.19 382.018 226.567C378.891 240.953 372.574 251.586 363.067 258.466C353.685 265.346 340.8 268.786 324.413 268.786H299.082L290.451 309.879C290.2 311.255 289.512 312.38 288.387 313.256C287.261 314.132 286.072 314.57 284.822 314.57H259.303ZM325.727 242.892C330.98 242.892 335.546 241.453 339.424 238.576C343.427 235.699 346.054 231.571 347.305 226.192C347.68 224.065 347.868 222.189 347.868 220.563C347.868 216.935 346.805 214.183 344.678 212.307C342.551 210.305 338.924 209.305 333.795 209.305H311.278L304.148 242.892H325.727Z" fill="white"/></svg> Optimism</span>
+        <span class="chainbadge" title="World Chain"><svg viewBox="0 0 600.10632 600.10632" preserveAspectRatio="xMidYMid" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs> <clipPath> <rect width="800" height="800" x="0" y="0" /> </clipPath> <clipPath> <path d="M 0,0 H 1728 V 1728 H 0 Z" /> </clipPath> </defs> <g clip-path="url(#__lottie_element_2)" transform="translate(-99.689875,-99.947068)"> <g clip-path="url(#__lottie_element_4)" transform="matrix(1.2367001,0,0,1.2367001,-668.2998,-668.50879)" opacity="1" style="display:block"> <g transform="matrix(1.2994699,0,0,1.2994699,725.31494,727.89368)" opacity="1" style="display:block"> <g opacity="1" transform="translate(131.17999,104.74)"> <path stroke-linecap="round" stroke-linejoin="miter" fill-opacity="0" stroke-miterlimit="10" stroke="#000000" stroke-opacity="1" stroke-width="35px" d="m 119.067,-87.470001 c 0,0 -145.507001,0.230003 -145.507001,0.230003 C -74.620003,-87.239998 -113.68,-48.18 -113.68,0 c 0,48.18 39.059997,87.239998 87.239999,87.239998 0,0 140.120001,0 140.120001,0" /> </g> </g> <g transform="matrix(1.2994699,0,0,1.2994699,643.73987,841.25928)" opacity="1" style="display:block"> <g opacity="1"> <path stroke-linecap="round" stroke-linejoin="miter" fill-opacity="0" stroke-miterlimit="10" stroke="#000000" stroke-opacity="1" stroke-width="35px" d="m 2.309,17.5 c 0,0 336.11101,0 336.11101,0" /> </g> </g> <g transform="matrix(1.2994699,0,0,1.2994699,620.99915,621.3761)" opacity="1" style="display:block"> <g opacity="1" transform="translate(186.71001,186.71001)"> <path stroke-linecap="round" stroke-linejoin="miter" fill-opacity="0" stroke-miterlimit="10" stroke="#000000" stroke-opacity="1" stroke-width="35px" d="M 0,-169.21001 C 93.452003,-169.21001 169.21001,-93.452003 169.21001,0 169.21001,93.452003 93.452003,169.21001 0,169.21001 -93.452003,169.21001 -169.21001,93.452003 -169.21001,0 -169.21001,-93.452003 -93.452003,-169.21001 0,-169.21001 Z" /> </g> </g> <g transform="matrix(1.2994699,0,0,1.2994699,621.49915,621.3761)" opacity="1" style="display:block"> <g opacity="1" transform="translate(186.71001,186.71001)"> <path stroke-linecap="round" stroke-linejoin="miter" fill-opacity="0" stroke-miterlimit="10" stroke="#000000" stroke-opacity="1" stroke-width="35px" d="M 0,0" /> </g> </g> </g> </g> </svg> World Chain</span>
       </div>
     </div>
     <div class="stage">
@@ -536,7 +527,7 @@
 
 <div class="modal-bg" id="modalBg">
   <div class="modal">
-    <h4>Connect a wallet</h4><p>you only need USDC on Arbitrum — nothing on Ethereum</p>
+    <h4>Connect a wallet</h4>
     <div id="walletList"></div>
     <p id="noWallets" style="display:none">No wallets found. Install MetaMask, Rabby, or another browser wallet and refresh.</p>
     <button class="x" id="closeModal">cancel</button>
@@ -553,6 +544,7 @@ const CHAINS = {
   base:     { hex: "0x2105", label: "Base" },
   polygon:  { hex: "0x89",   label: "Polygon" },
   optimism: { hex: "0xa",    label: "Optimism" },
+  worldchain: { hex: "0x1e0", label: "World Chain" },
 };
 const HEX_TO_CHAIN = Object.fromEntries(Object.entries(CHAINS).map(([k,v]) => [v.hex, v.label]));
 const MAINNET_RPC = "https://ethereum-rpc.publicnode.com";
@@ -579,34 +571,6 @@ const closeModal = () => document.getElementById("modalBg").classList.remove("sh
 document.getElementById("closeModal").onclick = closeModal;
 document.getElementById("modalBg").onclick = (e) => { if (e.target.id === "modalBg") closeModal(); };
 document.getElementById("connectBtn").onclick = () => { if (!account) openModal(); };
-// ----- network chip (only visible when a wallet is connected) -----
-function setNetChip(hexChainId) {
-  const lbl = HEX_TO_CHAIN[hexChainId] || "Unsupported";
-  const el = document.getElementById("netLabel"); if (el) el.textContent = lbl;
-  buildNetMenu(hexChainId);
-}
-function buildNetMenu(currentHex) {
-  const menu = document.getElementById("netMenu"); if (!menu) return;
-  menu.innerHTML = "";
-  Object.entries(CHAINS).forEach(([key, c]) => {
-    const b = document.createElement("button");
-    if (c.hex === currentHex) b.className = "cur";
-    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M12 2l9 5v10l-9 5-9-5V7l9-5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>' + c.label + (c.hex === currentHex ? " ✓" : "");
-    b.onclick = async () => {
-      menu.style.display = "none";
-      if (!selected) return;
-      try { await selected.provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: c.hex }] }); } catch (_) {}
-    };
-    menu.appendChild(b);
-  });
-}
-function showNetChip() { const w = document.getElementById("netWrap"); if (w) w.style.display = "block"; }
-function hideNetChip() { const w = document.getElementById("netWrap"); if (w) w.style.display = "none"; }
-(function wireNetChipToggle(){
-  const chip = document.getElementById("netChip"), menu = document.getElementById("netMenu");
-  if (chip) chip.onclick = (e) => { e.stopPropagation(); if (menu) menu.style.display = menu.style.display === "none" ? "block" : "none"; };
-  document.addEventListener("click", () => { if (menu) menu.style.display = "none"; });
-})();
 
 async function connect({ info, provider }) {
   try {
@@ -615,17 +579,19 @@ async function connect({ info, provider }) {
     try { await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: ARBITRUM_HEX }] }); } catch (_) {}
     closeModal();
     document.getElementById("connectBtn").textContent = account.slice(0,6) + "\u2026" + account.slice(-4);
-    // reveal + populate the network chip
-    showNetChip();
-    try { const cid = await provider.request({ method: "eth_chainId" }); setNetChip(cid); } catch (_) { setNetChip(ARBITRUM_HEX); }
     provider.on && provider.on("accountsChanged", (a) => {
       account = a[0] || null;
       document.getElementById("connectBtn").textContent = account ? account.slice(0,6) + "\u2026" + account.slice(-4) : "Connect wallet";
-      if (!account) hideNetChip();
     });
-    provider.on && provider.on("chainChanged", (cid) => { setNetChip(cid); });
   } catch (e) { alert("Could not connect: " + (e && e.message || e)); }
 }
+// Toggle: if already connected, clicking the button disconnects.
+document.getElementById("connectBtn").addEventListener("click", () => {
+  if (account) {
+    account = null; selected = null;
+    document.getElementById("connectBtn").textContent = "Connect wallet";
+  }
+});
 const clean = (n) => { n = (n||"").trim().toLowerCase(); return n.endsWith(".eth") ? n.slice(0,-4) : n; };
 let avatarSeq = 0; // guards against out-of-order async avatar loads
 function setAvatarLetter(lbl) {
@@ -886,11 +852,11 @@ function showView(id) {
 
 const SOCIALS = {
   "com.twitter": { base: "https://twitter.com/",
-    icon: '<svg viewBox="0 0 24 24" fill="none"><path d="M3 3l7.2 8.4M21 3l-8.8 9.6m0 0L3 21m9.2-8.4L21 21" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+    icon: '<svg viewBox="0 0 19 17" fill="none"><path d="M14.348 0.808594H17.1081L11.078 7.58599L18.1719 16.8086H12.6175L8.26698 11.2152L3.2891 16.8086H0.527315L6.97705 9.55939L0.171875 0.808594H5.86732L9.79978 5.92121L14.348 0.808594ZM13.3792 15.184H14.9087L5.03628 2.34787H3.39507L13.3792 15.184Z" fill="currentColor"/></svg>' },
   "com.github": { base: "https://github.com/",
-    icon: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.7C6.7 20 6.1 18 6.1 18c-.4-1.1-1.1-1.4-1.1-1.4-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.8.8.1-.6.3-1.1.6-1.3-2.2-.3-4.5-1.1-4.5-5 0-1.1.4-2 1-2.7-.1-.3-.5-1.3.1-2.7 0 0 .8-.3 2.8 1a9.6 9.6 0 0 1 5 0c1.9-1.3 2.8-1 2.8-1 .6 1.4.2 2.4.1 2.7.7.7 1 1.6 1 2.7 0 3.9-2.3 4.7-4.5 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5A10 10 0 0 0 22 12c0-5.5-4.5-10-10-10z" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>' },
+    icon: '<svg viewBox="0 0 20 21" fill="none"><path d="M12.5662 18.8281V15.5234C12.6811 14.4885 12.3843 13.4498 11.74 12.6318C14.2185 12.6318 16.697 10.9795 16.697 8.08789C16.7631 7.05518 16.4739 6.03898 15.8708 5.19629C16.1022 4.24619 16.1022 3.25479 15.8708 2.30469C15.8708 2.30469 15.0447 2.30469 13.3923 3.54395C11.2112 3.13086 8.96404 3.13086 6.78295 3.54395C5.1306 2.30469 4.30443 2.30469 4.30443 2.30469C4.05658 3.25479 4.05658 4.24619 4.30443 5.19629C3.70287 6.03558 3.4109 7.05748 3.47826 8.08789C3.47826 10.9795 5.95678 12.6318 8.43529 12.6318C8.11308 13.0367 7.87349 13.4993 7.73305 13.995C7.5926 14.4907 7.55129 15.0112 7.60912 15.5234V18.8281" stroke="currentColor" stroke-width="1.65234" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.61133 15.5234C3.88529 17.1758 3.48047 13.8711 1.82812 13.8711" stroke="currentColor" stroke-width="1.65234" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
   "org.telegram": { base: "https://t.me/",
-    icon: '<svg viewBox="0 0 24 24" fill="none"><path d="M22 3L2 11l6 2.5m14-10.5l-14 10.5m14-10.5l-5 18-3.5-7.5m-5.5-3L14 14" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>' },
+    icon: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.287 5.906q-1.168.486-4.666 2.01-.567.225-.595.442c-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294q.39.01.868-.32 3.269-2.206 3.374-2.23c.05-.012.12-.026.166.016s.042.12.037.141c-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8 8 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629q.14.092.27.187c.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.4 1.4 0 0 0-.013-.315.34.34 0 0 0-.114-.217.53.53 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09"/></svg>' },
   "com.youtube": { base: "https://youtube.com/@",
     icon: '<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="3" stroke="currentColor" stroke-width="2"/><path d="M10 9l5 3-5 3V9z" fill="currentColor"/></svg>' },
 };
@@ -954,7 +920,7 @@ async function renderProfile(name) {
   }
   if (contenthash) {
     links += '<a class="pf-link" href="https://' + esc(name) + '.limo" target="_blank" rel="noopener">' +
-      '<svg viewBox="0 0 24 24" fill="none"><path d="M4 20V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/><path d="M4 20h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="15" cy="13" r="1" fill="currentColor"/></svg>Limo</a>';
+      '<svg viewBox="-2 -2 40 38" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M18.0018 33.9995V34.001L18.0004 34.0002L18 34.0004L18 34L0.78125 24.0587V6.93279C0.78125 1.44182 4.6362 -0.783836 9.39152 1.96165C13.7591 4.48327 17.3671 10.3214 17.9265 15.511C22.409 14.4083 27.7967 14.9115 31.4556 17.024C36.2608 19.7983 36.2608 24.2963 31.4556 27.0706L18.0018 33.9995ZM15.0833 15.1901C15.0833 11.5603 12.535 7.14654 9.39152 5.33165C6.24805 3.51676 3.69976 4.98802 3.69976 8.61779V22.3737L4.0674 22.586L15.0833 16.7792V15.1901ZM15.0833 19.6391V28.946L6.65675 24.081L15.0833 19.6391Z" fill="currentColor"/></svg>Limo</a>';
   }
 
   const followers = stats && typeof stats.followers_count !== "undefined" ? stats.followers_count : null;
@@ -973,13 +939,13 @@ async function renderProfile(name) {
           ${followers !== null ? '<span class="pf-stat"><b>'+followers+'</b> followers</span>' : ''}
         </div>
         ${links ? '<div class="pf-links">'+links+'</div>' : ''}
-        ${ethAddr ? '<div class="pf-addr">resolves to <code>'+ethAddr.slice(0,6)+'…'+ethAddr.slice(-4)+'</code></div>' : ''}
+        ${ethAddr ? '<div class="pf-addr">resolves to <code>'+ethAddr.slice(0,6)+'…'+ethAddr.slice(-4)+'</code> <button class="copy-addr" data-addr="'+ethAddr+'" title="Copy full address">copy</button></div>' : ''}
         <div class="pf-expiry" id="pfExpiry" style="display:none"></div>
         <div class="pf-keptalive" id="pfKeptAlive" style="display:none"></div>
         <div class="pf-share">
           <button id="shareCopy" type="button"><svg viewBox="0 0 24 24" fill="none"><path d="M9 9h10v10H9zM5 15V5h10" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>Copy link</button>
-          <button id="shareX" class="share-x" type="button"><svg viewBox="0 0 24 24" fill="none"><path d="M4 4l16 16M20 4L4 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Share on X</button>
-          <button id="shareCast" type="button"><svg viewBox="0 0 24 24" fill="none"><path d="M5 6h14M6 6v12M18 6v12M4 18h6M14 18h6M7 10h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Cast</button>
+          <button id="shareX" class="share-x" type="button"><svg viewBox="0 0 19 17" fill="none"><path d="M14.348 0.808594H17.1081L11.078 7.58599L18.1719 16.8086H12.6175L8.26698 11.2152L3.2891 16.8086H0.527315L6.97705 9.55939L0.171875 0.808594H5.86732L9.79978 5.92121L14.348 0.808594ZM13.3792 15.184H14.9087L5.03628 2.34787H3.39507L13.3792 15.184Z" fill="currentColor"/></svg>Share on X</button>
+          <button id="shareCast" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M3 7h3.5V4h11v3H21v14H3V7zm5 14c0-5.5 1.8-9.5 4-9.5s4 4 4 9.5H8z"/></svg>Cast</button>
         </div>
       </div>
     </div>
@@ -988,17 +954,6 @@ async function renderProfile(name) {
       <div class="inputView">
         <h3>Keep ${esc(name)} alive</h3>
         <p class="psub">a few dollars adds time to this name — paid from any chain, renewed on Ethereum.</p>
-        <div class="chainsel">
-          <div class="chainsel-lbl">Pay with USDC from</div>
-          <div class="chainsel-opts">
-            <button type="button" class="chainopt sel" data-chain="arbitrum"><svg viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg"><g> <path fill="#213147" d="M45.3,152V348c0,12.5,6.6,24,17.5,30.3l169.8,98c10.8,6.2,24.1,6.2,35,0l169.8-98 c10.8-6.2,17.5-17.8,17.5-30.3V152c0-12.5-6.6-24-17.5-30.3l-169.8-98c-10.8-6.2-24.1-6.2-35,0l-169.8,98 C52,127.9,45.3,139.5,45.3,152z"/> <g> <g> <g> <path fill="#12AAFF" d="M287.1,288l-24.2,66.4c-0.7,1.8-0.7,3.9,0,5.7l41.6,114.2l48.2-27.8L294.9,288 C293.6,284.3,288.5,284.3,287.1,288z"/> </g> <g> <path fill="#12AAFF" d="M335.6,176.3c-1.3-3.7-6.4-3.7-7.8,0l-24.2,66.4c-0.7,1.8-0.7,3.9,0,5.7l68.2,187.1l48.2-27.8L335.6,176.3z "/> </g> </g> </g> <path fill="#9DCCED" d="M250,31c1.2,0,2.4,0.3,3.5,0.9L437.2,138c2.1,1.2,3.5,3.5,3.5,5.9V356c0,2.5-1.3,4.7-3.5,5.9L253.5,468.1 c-1,0.6-2.2,0.9-3.5,0.9s-2.4-0.3-3.5-0.9L62.9,362c-2.1-1.2-3.5-3.5-3.5-5.9V143.9c0-2.5,1.3-4.7,3.5-5.9L246.6,31.9 C247.6,31.3,248.9,31,250,31 M250,0c-6.5,0-13.1,1.7-18.9,5.1L47.4,111.2c-11.7,6.7-18.9,19.2-18.9,32.7V356 c0,13.5,7.3,26.1,18.9,32.8l183.7,106.1c5.8,3.4,12.4,5.1,18.9,5.1c6.5,0,13.1-1.7,18.9-5.1l183.7-106.1 c11.8-6.7,18.9-19.2,18.9-32.8V143.9c0-13.5-7.3-26.1-18.9-32.8L269,5.1C263.1,1.7,256.5,0,250,0L250,0z"/> <polygon fill="#213147" points="128.6,435.7 145.5,389.4 179.4,417.7 147.7,446.7 "/> <g> <path fill="#FFFFFF" d="M234.6,128.8H188c-3.5,0-6.6,2.1-7.8,5.4L80.4,407.9l48.2,27.8l109.9-301.4 C239.5,131.6,237.5,128.8,234.6,128.8z"/> <path fill="#FFFFFF" d="M316.1,128.8h-46.5c-3.5,0-6.6,2.1-7.8,5.4l-114,312.5l48.2,27.8L320,134.4 C321,131.6,318.9,128.8,316.1,128.8z"/> </g> </g></svg>Arbitrum</button>
-            <button type="button" class="chainopt" data-chain="ethereum"><svg viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon fill="#2F3030" points="249.982,6.554 397.98,251.112 250.53,188.092 "/> <polygon fill="#828384" points="102.39,251.112 249.982,6.554 250.53,188.092 "/> <polygon fill="#343535" points="249.982,341.285 102.39,251.112 250.53,188.092 "/> <polygon fill="#131313" points="397.98,251.112 250.53,188.092 249.982,341.285 "/> <polygon fill="#2F3030" points="249.982,372.329 397.98,284.597 249.982,493.13 "/> <polygon fill="#828384" points="249.982,372.329 102.39,284.597 249.982,493.13 "/></svg>Ethereum</button>
-            <button type="button" class="chainopt" data-chain="base"><svg viewBox="0 0 1280 1280" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M0,101.12c0-34.64,0-51.95,6.53-65.28,6.25-12.76,16.56-23.07,29.32-29.32C49.17,0,66.48,0,101.12,0h1077.76c34.63,0,51.96,0,65.28,6.53,12.75,6.25,23.06,16.56,29.32,29.32,6.52,13.32,6.52,30.64,6.52,65.28v1077.76c0,34.63,0,51.96-6.52,65.28-6.26,12.75-16.57,23.06-29.32,29.32-13.32,6.52-30.65,6.52-65.28,6.52H101.12c-34.64,0-51.95,0-65.28-6.52-12.76-6.26-23.07-16.57-29.32-29.32-6.53-13.32-6.53-30.65-6.53-65.28V101.12Z" fill="#0052FF"/></svg>Base</button>
-            <button type="button" class="chainopt" data-chain="polygon"><svg viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="#8247E5" d="M377.3,163.9c-9.2-5.4-21.2-5.4-31.4,0l-72,41.7l-48.9,27.2l-72,41.7c-9.2,5.4-21.2,5.4-31.4,0l-57.2-32.6 c-9.2-5.4-15.7-15.4-15.7-26.3v-64.3c0-10.9,5.5-20.8,15.7-26.3l56.3-31.7c9.2-5.4,21.2-5.4,31.4,0l56.3,31.7 c9.2,5.4,15.7,15.4,15.7,26.3v41.7l48.9-28.1v-41.7c0-10.9-5.5-20.8-15.7-26.3L153.1,37.1c-9.2-5.4-21.2-5.4-31.4,0L15.7,96.9 C5.5,102.3,0,112.3,0,123.2v120.5c0,10.9,5.5,20.8,15.7,26.3l106.1,59.8c9.2,5.4,21.2,5.4,31.4,0l72-40.8l48.9-28.1l72-40.8 c9.2-5.4,21.2-5.4,31.4,0l56.3,31.7c9.2,5.4,15.7,15.4,15.7,26.3v64.3c0,10.9-5.5,20.8-15.7,26.3l-56.3,32.6 c-9.2,5.4-21.2,5.4-31.4,0l-56.3-31.7c-9.2-5.4-15.7-15.4-15.7-26.3v-41.7l-48.9,28.1v41.7c0,10.9,5.5,20.8,15.7,26.3l106.1,59.8 c9.2,5.4,21.2,5.4,31.4,0l106.1-59.8c9.2-5.4,15.7-15.4,15.7-26.3V250.9c0-10.9-5.5-20.8-15.7-26.3L377.3,163.9z"/></svg>Polygon</button>
-            <button type="button" class="chainopt" data-chain="optimism"><svg viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="250" cy="250" r="250" fill="#FF0420"/> <path d="M177.133 316.446C162.247 316.446 150.051 312.943 140.544 305.938C131.162 298.808 126.471 288.676 126.471 275.541C126.471 272.789 126.784 269.411 127.409 265.408C129.036 256.402 131.35 245.581 134.352 232.947C142.858 198.547 164.812 181.347 200.213 181.347C209.845 181.347 218.476 182.973 226.107 186.225C233.738 189.352 239.742 194.106 244.12 200.486C248.498 206.74 250.688 214.246 250.688 223.002C250.688 225.629 250.375 228.944 249.749 232.947C247.873 244.08 245.621 254.901 242.994 265.408C238.616 282.546 231.048 295.368 220.29 303.874C209.532 312.255 195.147 316.446 177.133 316.446ZM179.76 289.426C186.766 289.426 192.707 287.362 197.586 283.234C202.59 279.106 206.155 272.789 208.281 264.283C211.158 252.524 213.348 242.266 214.849 233.51C215.349 230.883 215.599 228.194 215.599 225.441C215.599 214.058 209.657 208.366 197.774 208.366C190.768 208.366 184.764 210.43 179.76 214.558C174.882 218.687 171.379 225.004 169.253 233.51C167.001 241.891 164.749 252.149 162.498 264.283C161.997 266.784 161.747 269.411 161.747 272.163C161.747 283.672 167.752 289.426 179.76 289.426Z" fill="white"/> <path d="M259.303 314.57C257.927 314.57 256.863 314.132 256.113 313.256C255.487 312.255 255.3 311.13 255.55 309.879L281.444 187.914C281.694 186.538 282.382 185.412 283.508 184.536C284.634 183.661 285.822 183.223 287.073 183.223H336.985C350.87 183.223 362.003 186.1 370.384 191.854C378.891 197.609 383.144 205.927 383.144 216.81C383.144 219.937 382.769 223.19 382.018 226.567C378.891 240.953 372.574 251.586 363.067 258.466C353.685 265.346 340.8 268.786 324.413 268.786H299.082L290.451 309.879C290.2 311.255 289.512 312.38 288.387 313.256C287.261 314.132 286.072 314.57 284.822 314.57H259.303ZM325.727 242.892C330.98 242.892 335.546 241.453 339.424 238.576C343.427 235.699 346.054 231.571 347.305 226.192C347.68 224.065 347.868 222.189 347.868 220.563C347.868 216.935 346.805 214.183 344.678 212.307C342.551 210.305 338.924 209.305 333.795 209.305H311.278L304.148 242.892H325.727Z" fill="white"/></svg>Optimism</button>
-          </div>
-          <div class="chain-note" id="chainNote"></div>
-        </div>
         <label>How much do you want to chip in?</label>
         <div class="field"><span class="prefix">$</span><input id="pfAmt" value="5" inputmode="decimal" /><span class="suffix"><svg class="usdc-mark" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg"><circle fill="#2775CA" cx="250" cy="250" r="248.3"/> <path fill="#FFFFFF" d="M203.4,422.7c0,5.8-4.7,9.1-10.1,7.4C118.1,406,63.8,335.7,63.8,252.5c0-83,54.3-153.4,129.6-177.5 c5.6-1.7,10.1,1.6,10.1,7.4v14.5c0,3.9-2.9,8.3-6.6,9.7c-59.6,21.9-102,79.1-102,145.9c0,66.9,42.5,124,102,145.7 c3.7,1.4,6.6,5.8,6.6,9.7V422.7z"/> <path fill="#FFFFFF" d="M265.5,368.9c0,4.3-3.5,7.8-7.8,7.8h-15.5c-4.3,0-7.8-3.5-7.8-7.8v-24.4c-33.9-4.7-50.4-23.5-54.9-49.5 c-0.8-4.5,2.7-8.3,7.2-8.3h17.7c3.7,0,6.8,2.7,7.6,6.2c3.3,15.3,12.2,27.2,39.4,27.2c20,0,34.3-11.3,34.3-27.9 c0-16.7-8.3-23.1-37.8-27.9c-43.5-5.8-64-19-64-53c0-26.2,20-46.8,50.6-51v-24.1c0-4.3,3.5-7.8,7.8-7.8h15.5c4.3,0,7.8,3.5,7.8,7.8 v24.6c25,4.5,40.9,18.6,46.2,42.3c1,4.5-2.5,8.5-7.2,8.5h-16.3c-3.5,0-6.4-2.3-7.4-5.6c-4.5-14.9-15.1-21.5-33.8-21.5 c-20.6,0-31.2,9.9-31.2,23.9c0,14.7,6,22.1,37.6,26.6c42.7,5.8,64.8,18,64.8,54.3c0,27.5-20.6,49.9-52.6,54.9v24.8H265.5z"/> <path fill="#FFFFFF" d="M306.6,430c-5.6,1.7-10.1-1.6-10.1-7.4v-14.5c0-4.3,2.5-8.3,6.6-9.7c59.4-21.7,102-79,102-145.7 c0-66.9-42.5-124-102-145.7c-3.7-1.4-6.6-5.8-6.6-9.7V82.8c0-5.8,4.7-9.1,10.1-7.4c75.3,23.7,129.6,94.1,129.6,177.1 C436.2,335.7,381.9,406,306.6,430z"/></svg> USDC</span></div>
         <div class="amts" id="pfAmtsSlot"></div>
@@ -1064,27 +1019,7 @@ async function renderProfile(name) {
     pfUpdateEstimate();
   }; });
   pfUpdateEstimate();
-  // chain selector — UI is multi-chain; dev backend currently settles via Arbitrum only.
-  let selectedChain = "arbitrum";
-  const chainNote = document.getElementById("chainNote");
-  const pfFine = document.getElementById("pfFine");
-  function applyChainCopy(chainKey) {
-    const lbl = (CHAINS[chainKey] || CHAINS.arbitrum).label;
-    if (pfFine) pfFine.textContent = "You'll authorize a gasless x402 payment on " + lbl + ".";
-    chainNote.textContent = chainKey === "arbitrum" ? "" : "in development — paying from " + lbl + " is coming soon; using Arbitrum for now.";
-  }
-  document.querySelectorAll(".chainopt").forEach((el) => { el.onclick = async () => {
-    document.querySelectorAll(".chainopt").forEach(a=>a.classList.remove("sel"));
-    el.classList.add("sel");
-    selectedChain = el.dataset.chain;
-    applyChainCopy(selectedChain);
-    // If a wallet is connected, switch its network to match (prod behavior); nav chip updates via chainChanged.
-    if (account && selected && CHAINS[selectedChain]) {
-      try { await selected.provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAINS[selectedChain].hex }] }); }
-      catch (_) {}
-    }
-  }; });
-  applyChainCopy("arbitrum");
+
   document.getElementById("pfExtendBtn").onclick = () => {
     CTX = document.getElementById("profExtend");
     // NOTE: selectedChain is captured for prod; dev /quote + facilitator still use Arbitrum.
@@ -1117,6 +1052,12 @@ async function renderProfile(name) {
 
   // social proof: count this name's renewals from the on-chain Renewed event (best-effort).
   // Honest: counts namepass renewals of THIS name on the helper contract; if none/blocked, invite to be first.
+  // Wire address copy button
+  const copyAddr = document.querySelector(".copy-addr");
+  if (copyAddr) copyAddr.onclick = async function() {
+    try { await navigator.clipboard.writeText(this.dataset.addr); this.textContent = "copied!"; setTimeout(()=>{this.textContent="copy";}, 1500); }
+    catch(_) { prompt("copy:", this.dataset.addr); }
+  };
   loadExpiry(label).catch(() => {});
   loadKeptAlive(label).catch(() => {});
 }
