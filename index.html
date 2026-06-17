@@ -542,6 +542,14 @@
   </div>
 </div><!-- /view-profile -->
 
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h4>Connect a wallet</h4>
+    <div id="walletList"></div>
+    <p id="noWallets" style="display:none">No wallets found. Install MetaMask, Rabby, or another browser wallet and refresh.</p>
+    <button class="x" id="closeModal">cancel</button>
+  </div>
+</div>
 
 <script>
 const ENDPOINT = "https://arbitrum-renew-ens-905612704113.europe-west1.run.app";
@@ -556,13 +564,10 @@ const CHAINS = {
   worldchain: { hex: "0x1e0", label: "World Chain" },
 };
 const HEX_TO_CHAIN = Object.fromEntries(Object.entries(CHAINS).map(([k,v]) => [v.hex, v.label]));
-const CHAIN_KEY_BY_HEX = Object.fromEntries(Object.entries(CHAINS).map(([k,v]) => [v.hex.toLowerCase(), k]));
-const REOWN_NETWORK_KEYS = new Set(["ethereum", "arbitrum", "base", "polygon", "optimism"]);
-let selectedChain = "arbitrum";
 const MAINNET_RPC = "https://ethereum-rpc.publicnode.com";
 const RESOLVIO_REVERSE_API = "https://api.resolvio.xyz/ens/v2/reverse/";
 const RENEWED_ABI = ["event Renewed(bytes32 indexed paymentId, bytes32 indexed labelHash, bytes32 indexed referrer, string label, uint256 duration, uint256 costWei, uint256 ethProvided)"];
-let selected = null, account = null;
+let providers = [], selected = null, account = null;
 const shortAddress = (addr) => addr ? addr.slice(0,6) + "\u2026" + addr.slice(-4) : "";
 
 async function getPrimaryName(addr) {
@@ -621,142 +626,48 @@ async function setConnectButtonAccount(addr) {
     } catch (_) {}
   } catch (_) {}
 }
-// Reown AppKit owns wallet connection. It is lazy-loaded only when the user clicks Connect.
-let reownAppKit = null;
-let reownLoading = null;
-let reownLastAddress = null;
-
-function normalizeChainId(chainId) {
-  if (chainId === undefined || chainId === null) return null;
-  if (typeof chainId === "number") return "0x" + chainId.toString(16);
-  if (typeof chainId === "bigint") return "0x" + chainId.toString(16);
-  if (typeof chainId === "string") {
-    if (chainId.startsWith("eip155:")) return "0x" + Number(chainId.slice(7)).toString(16);
-    if (chainId.startsWith("0x")) return chainId.toLowerCase();
-    const n = Number(chainId);
-    return Number.isFinite(n) ? "0x" + n.toString(16) : null;
-  }
-  return null;
+window.addEventListener("eip6963:announceProvider", (e) => {
+  const { info, provider } = e.detail;
+  if (!providers.find((p) => p.info.uuid === info.uuid)) { providers.push({ info, provider }); renderWalletList(); }
+});
+window.dispatchEvent(new Event("eip6963:requestProvider"));
+function renderWalletList() {
+  const list = document.getElementById("walletList"), none = document.getElementById("noWallets");
+  list.innerHTML = "";
+  if (!providers.length) { none.style.display = "block"; return; }
+  none.style.display = "none";
+  providers.forEach(({ info, provider }) => {
+    const b = document.createElement("button"); b.className = "wbtn";
+    b.innerHTML = '<img src="' + info.icon + '" alt=""/> ' + info.name;
+    b.onclick = () => connect({ info, provider }); list.appendChild(b);
+  });
 }
+const openModal = () => document.getElementById("modalBg").classList.add("show");
+const closeModal = () => document.getElementById("modalBg").classList.remove("show");
+document.getElementById("closeModal").onclick = closeModal;
+document.getElementById("modalBg").onclick = (e) => { if (e.target.id === "modalBg") closeModal(); };
+document.getElementById("connectBtn").onclick = () => { if (!account) openModal(); };
 
-function syncChainSelectorFromWallet(chainId) {
-  const hex = normalizeChainId(chainId);
-  const key = hex ? CHAIN_KEY_BY_HEX[hex] : null;
-  if (!key) return;
-  selectedChain = key;
-  document.querySelectorAll(".chainopt").forEach((btn) => btn.classList.toggle("sel", btn.dataset.chain === key));
-  const c = CHAINS[key];
-  const pfFine = document.getElementById("pfFine");
-  const chainNote = document.getElementById("chainNote");
-  if (pfFine && c) pfFine.textContent = "You'll authorize a gasless x402 payment on " + c.label + ".";
-  if (chainNote && c) chainNote.textContent = key === "arbitrum" ? "" : "in development — paying from " + c.label + " is coming soon; using Arbitrum for now.";
-}
-
-let reownWatchedProvider = null;
-function attachReownChainSync(provider) {
-  if (!provider || reownWatchedProvider === provider) return;
-  reownWatchedProvider = provider;
-  if (typeof provider.request === "function") {
-    provider.request({ method: "eth_chainId" }).then(syncChainSelectorFromWallet).catch(() => {});
-  }
-  if (typeof provider.on === "function") {
-    provider.on("chainChanged", syncChainSelectorFromWallet);
-  }
-}
-
-function clearWalletState() {
-  account = null;
-  selected = null;
-  reownLastAddress = null;
-  setConnectButtonAccount(null);
-}
-
-async function ensureReownAppKit() {
-  if (reownAppKit) return reownAppKit;
-  if (reownLoading) return reownLoading;
-
-  reownLoading = (async () => {
-    const [{ createAppKit }, { EthersAdapter }, networks] = await Promise.all([
-      import("https://esm.sh/@reown/appkit@1.8.20?bundle"),
-      import("https://esm.sh/@reown/appkit-adapter-ethers@1.8.20?bundle"),
-      import("https://esm.sh/@reown/appkit@1.8.20/networks?bundle")
-    ]);
-
-    const { mainnet, arbitrum, base, polygon, optimism } = networks;
-    const appKit = createAppKit({
-      adapters: [new EthersAdapter()],
-      networks: [mainnet, arbitrum, base, polygon, optimism],
-      defaultNetwork: arbitrum,
-      projectId: "30e2ea901580311e378e5fb6eee06ee0",
-      metadata: {
-        name: "namepass",
-        description: "Keep ENS names alive from any chain",
-        url: window.location.origin || "https://namepass.xyz",
-        icons: [window.location.origin ? window.location.origin + "/favicon.ico" : "https://namepass.xyz/favicon.ico"]
-      },
-      enableNetworkSwitch: false,
-      enableWalletGuide: false,
-      enableReconnect: false,
-      debug: false,
-      features: {
-        analytics: false,
-        email: false,
-        socials: false,
-        swaps: false,
-        onramp: false,
-        connectMethodsOrder: ["wallet"],
-        legalCheckbox: false
-      },
-      themeMode: "light"
-    });
-
-    appKit.subscribeProviders((state) => {
-      const provider = state && state.eip155;
-      if (provider) {
-        selected = { info: { name: "Reown", rdns: "reown.appkit" }, provider };
-        attachReownChainSync(provider);
-      }
-    });
-
-    appKit.subscribeAccount((state) => {
-      const next = state && state.address ? state.address : null;
-      const normalized = next ? next.toLowerCase() : null;
-      if (normalized === reownLastAddress) return;
-      reownLastAddress = normalized;
-
-      if (!next) {
-        account = null;
-        selected = null;
-        setConnectButtonAccount(null);
-        return;
-      }
-
-      account = next;
+async function connect({ info, provider }) {
+  try {
+    const accs = await provider.request({ method: "eth_requestAccounts" });
+    account = accs[0]; selected = { info, provider };
+    try { await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: ARBITRUM_HEX }] }); } catch (_) {}
+    closeModal();
+    setConnectButtonAccount(account);
+    provider.on && provider.on("accountsChanged", (a) => {
+      account = a[0] || null;
       setConnectButtonAccount(account);
     });
-
-    reownAppKit = appKit;
-    return appKit;
-  })();
-
-  try { return await reownLoading; }
-  finally { reownLoading = null; }
+  } catch (e) { alert("Could not connect: " + (e && e.message || e)); }
 }
-
-async function openReown(view) {
-  const appKit = await ensureReownAppKit();
-  return appKit.open(view ? { view } : undefined);
-}
-
-const connectBtn = document.getElementById("connectBtn");
-connectBtn.addEventListener("click", async () => {
-  try {
-    await openReown(account ? "Account" : "Connect");
-  } catch (e) {
-    alert("Wallet connector failed to load. Please refresh and try again.");
+// Toggle: if already connected, clicking the button disconnects.
+document.getElementById("connectBtn").addEventListener("click", () => {
+  if (account) {
+    account = null; selected = null;
+    setConnectButtonAccount(null);
   }
 });
-
 const clean = (n) => { n = (n||"").trim().toLowerCase(); return n.endsWith(".eth") ? n.slice(0,-4) : n; };
 let avatarSeq = 0; // guards against out-of-order async avatar loads
 function setAvatarLetter(lbl) {
@@ -918,7 +829,7 @@ async function runExtend(lbl, amt) {
   lbl = clean(lbl); amt = String(amt).trim();
   if ([...lbl].length < 3) return shake();
   if (!amt || parseFloat(amt) <= 0) return shake();
-  if (!account) { await openReown("Connect"); return; }
+  if (!account) { openModal(); return; }
   showTracker();
   let quote, submitOut;
   try {
@@ -1071,38 +982,19 @@ function txt(profile, key) {
   return t && t.exists ? t.value : null;
 }
 
-async function loadProfileStats(name, statsPromise) {
-  const box = document.getElementById("pfStats");
-  if (!box || box.dataset.name !== name) return;
-  try {
-    const stats = await statsPromise;
-    if (!stats || box.dataset.name !== name) return;
-    const followers = typeof stats.followers_count !== "undefined" ? stats.followers_count : null;
-    const following = typeof stats.following_count !== "undefined" ? stats.following_count : null;
-    box.innerHTML = [
-      following !== null ? '<span class="pf-stat"><b>' + following + '</b> following</span>' : '',
-      followers !== null ? '<span class="pf-stat"><b>' + followers + '</b> followers</span>' : ''
-    ].join('');
-  } catch (_) {}
-}
-
 async function renderProfile(name) {
   showView("view-profile");
   const body = document.getElementById("pfBody");
   body.innerHTML = '<div class="pf-loading">loading ' + esc(name) + '…</div>';
 
-  // Start both requests immediately. Only Resolvio blocks the initial render;
-  // EFP is best-effort and updates the stats row when it finishes.
-  const profilePromise = fetch(RESOLVIO + encodeURIComponent(name))
-    .then((r) => r.ok ? r.json() : null)
-    .catch(() => null);
-  const statsPromise = fetch(EFP + encodeURIComponent(name) + "/stats?live=true")
-    .then((r) => r.ok ? r.json() : null)
-    .catch(() => null);
-
-  let profile = null;
+  // Fetch profile (required) and stats (best-effort) in parallel.
+  let profile = null, stats = null;
   try {
-    profile = await profilePromise;
+    const [pRes, sRes] = await Promise.all([
+      fetch(RESOLVIO + encodeURIComponent(name)).then((r) => r.ok ? r.json() : null).catch(() => null),
+      fetch(EFP + encodeURIComponent(name) + "/stats?live=true").then((r) => r.ok ? r.json() : null).catch(() => null),
+    ]);
+    profile = pRes; stats = sRes;
   } catch (_) {}
 
   const label = name.replace(/\.eth$/, "");
@@ -1146,6 +1038,9 @@ async function renderProfile(name) {
       '<svg viewBox="-2 -2 40 38" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M18.0018 33.9995V34.001L18.0004 34.0002L18 34.0004L18 34L0.78125 24.0587V6.93279C0.78125 1.44182 4.6362 -0.783836 9.39152 1.96165C13.7591 4.48327 17.3671 10.3214 17.9265 15.511C22.409 14.4083 27.7967 14.9115 31.4556 17.024C36.2608 19.7983 36.2608 24.2963 31.4556 27.0706L18.0018 33.9995ZM15.0833 15.1901C15.0833 11.5603 12.535 7.14654 9.39152 5.33165C6.24805 3.51676 3.69976 4.98802 3.69976 8.61779V22.3737L4.0674 22.586L15.0833 16.7792V15.1901ZM15.0833 19.6391V28.946L6.65675 24.081L15.0833 19.6391Z" fill="currentColor"/></svg>Limo</a>';
   }
 
+  const followers = stats && typeof stats.followers_count !== "undefined" ? stats.followers_count : null;
+  const following = stats && typeof stats.following_count !== "undefined" ? stats.following_count : null;
+
   body.innerHTML = `
     <div class="pf-card">
       <div class="pf-banner">${header ? '<img src="'+esc(header)+'" alt="" referrerpolicy="no-referrer" onerror="this.remove()">' : ''}</div>
@@ -1154,7 +1049,10 @@ async function renderProfile(name) {
         <div class="pf-name"><span>${esc(name)}</span><svg class="ens-mark" viewBox="0 0 202 231" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M98.3592 2.80337L34.8353 107.327C34.3371 108.147 33.1797 108.238 32.5617 107.505C26.9693 100.864 6.13478 72.615 31.9154 46.8673C55.4403 23.3726 85.4045 6.62129 96.5096 0.831705C97.7695 0.174847 99.0966 1.59007 98.3592 2.80337Z" fill="#0080BC"/> <path d="M94.8459 230.385C96.1137 231.273 97.6758 229.759 96.8261 228.467C82.6374 206.886 35.4713 135.081 28.9559 124.302C22.5295 113.67 9.88976 96.001 8.83534 80.8842C8.7301 79.3751 6.64332 79.0687 6.11838 80.4879C5.27178 82.7767 4.37045 85.5085 3.53042 88.6292C-7.07427 128.023 8.32698 169.826 41.7753 193.238L94.8459 230.386V230.385Z" fill="#0080BC"/> <path d="M103.571 228.526L167.095 124.003C167.593 123.183 168.751 123.092 169.369 123.825C174.961 130.465 195.796 158.715 170.015 184.463C146.49 207.957 116.526 224.709 105.421 230.498C104.161 231.155 102.834 229.74 103.571 228.526Z" fill="#0080BC"/> <path d="M107.154 0.930762C105.886 0.0433954 104.324 1.5567 105.174 2.84902C119.363 24.4301 166.529 96.2354 173.044 107.014C179.471 117.646 192.11 135.315 193.165 150.432C193.27 151.941 195.357 152.247 195.882 150.828C196.728 148.539 197.63 145.808 198.47 142.687C209.074 103.293 193.673 61.4905 160.225 38.078L107.154 0.930762Z" fill="#0080BC"/></svg></div>
         ${desc ? '<div class="pf-desc">'+esc(desc)+'</div>' : ''}
         ${location ? '<div class="pf-addr" style="margin-top:10px">\ud83d\udccd '+esc(location)+'</div>' : ''}
-        <div class="pf-stats" id="pfStats" data-name="${esc(name)}"></div>
+        <div class="pf-stats">
+          ${following !== null ? '<span class="pf-stat"><b>'+following+'</b> following</span>' : ''}
+          ${followers !== null ? '<span class="pf-stat"><b>'+followers+'</b> followers</span>' : ''}
+        </div>
         ${links ? '<div class="pf-links">'+links+'</div>' : ''}
         ${ethAddr ? '<div class="pf-addr">resolves to <code>'+ethAddr.slice(0,6)+'…'+ethAddr.slice(-4)+'</code> <button class="copy-addr" data-addr="'+ethAddr+'" title="Copy full address">copy</button></div>' : ''}
         <div class="pf-expiry" id="pfExpiry" style="display:none"></div>
@@ -1203,8 +1101,6 @@ async function renderProfile(name) {
     </div>
     <p class="pf-poweredby">every .eth name kept alive with <a href="/">namepass</a></p>`;
 
-  loadProfileStats(name, statsPromise).catch(() => {});
-
   // wire the profile support panel (amount estimate + extend)
   const pfAmt = document.getElementById("pfAmt");
   const pfEst = document.getElementById("pfEstimate");
@@ -1246,6 +1142,7 @@ async function renderProfile(name) {
 
   // Chain selector: build from CHAINS config with colored dots
   const CHAIN_COLORS = { ethereum:"#2F3030", arbitrum:"#12AAFF", base:"#1652F0", polygon:"#8247E5", optimism:"#FF0420", worldchain:"#000" };
+  let selectedChain = "arbitrum";
   const chainSelOpts = document.getElementById("chainSelOpts");
   const chainNote = document.getElementById("chainNote");
   const pfFine = document.getElementById("pfFine");
@@ -1261,7 +1158,7 @@ async function renderProfile(name) {
         selectedChain = key;
         if (pfFine) pfFine.textContent = "You'll authorize a gasless x402 payment on " + c.label + ".";
         chainNote.textContent = key === "arbitrum" ? "" : "in development — paying from " + c.label + " is coming soon; using Arbitrum for now.";
-        if (account && selected && c.hex && REOWN_NETWORK_KEYS.has(key)) {
+        if (account && selected && c.hex) {
           try { await selected.provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: c.hex }] }); } catch (_) {}
         }
       };
