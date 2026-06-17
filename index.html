@@ -557,8 +557,36 @@ const CHAINS = {
 };
 const HEX_TO_CHAIN = Object.fromEntries(Object.entries(CHAINS).map(([k,v]) => [v.hex, v.label]));
 const MAINNET_RPC = "https://ethereum-rpc.publicnode.com";
+const RESOLVIO_REVERSE_API = "https://api.resolvio.xyz/ens/v2/reverse/";
 const RENEWED_ABI = ["event Renewed(bytes32 indexed paymentId, bytes32 indexed labelHash, bytes32 indexed referrer, string label, uint256 duration, uint256 costWei, uint256 ethProvided)"];
 let providers = [], selected = null, account = null;
+const shortAddress = (addr) => addr ? addr.slice(0,6) + "\u2026" + addr.slice(-4) : "";
+
+async function getPrimaryName(addr) {
+  if (!addr) return null;
+  const r = await fetch(RESOLVIO_REVERSE_API + encodeURIComponent(addr));
+  if (!r.ok) return null;
+  const j = await r.json();
+  return (j && j.hasReverseRecord && typeof j.name === "string" && j.name.endsWith(".eth")) ? j.name : null;
+}
+
+async function setConnectButtonAccount(addr) {
+  const btn = document.getElementById("connectBtn");
+  if (!btn) return;
+  if (!addr) { btn.textContent = "Connect wallet"; btn.removeAttribute("title"); return; }
+
+  btn.textContent = shortAddress(addr);
+  btn.title = addr;
+
+  try {
+    const name = await getPrimaryName(addr);
+    // Guard against late API responses after account changed/disconnected.
+    if (name && account && account.toLowerCase() === addr.toLowerCase()) {
+      btn.textContent = name;
+      btn.title = addr;
+    }
+  } catch (_) {}
+}
 window.addEventListener("eip6963:announceProvider", (e) => {
   const { info, provider } = e.detail;
   if (!providers.find((p) => p.info.uuid === info.uuid)) { providers.push({ info, provider }); renderWalletList(); }
@@ -587,10 +615,10 @@ async function connect({ info, provider }) {
     account = accs[0]; selected = { info, provider };
     try { await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: ARBITRUM_HEX }] }); } catch (_) {}
     closeModal();
-    document.getElementById("connectBtn").textContent = account.slice(0,6) + "\u2026" + account.slice(-4);
+    setConnectButtonAccount(account);
     provider.on && provider.on("accountsChanged", (a) => {
       account = a[0] || null;
-      document.getElementById("connectBtn").textContent = account ? account.slice(0,6) + "\u2026" + account.slice(-4) : "Connect wallet";
+      setConnectButtonAccount(account);
     });
   } catch (e) { alert("Could not connect: " + (e && e.message || e)); }
 }
@@ -598,7 +626,7 @@ async function connect({ info, provider }) {
 document.getElementById("connectBtn").addEventListener("click", () => {
   if (account) {
     account = null; selected = null;
-    document.getElementById("connectBtn").textContent = "Connect wallet";
+    setConnectButtonAccount(null);
   }
 });
 const clean = (n) => { n = (n||"").trim().toLowerCase(); return n.endsWith(".eth") ? n.slice(0,-4) : n; };
@@ -660,11 +688,11 @@ function refreshSearchPreview() {
   document.getElementById("namePreview").textContent = shown + ".eth";
   setAvatarLetter(shown);
   const ok = [...lbl].length >= 3;
-  document.getElementById("nameState").textContent = !lbl ? "type a name to preview" : (ok ? "ready — view the page" : "names need 3+ letters");
+  document.getElementById("nameState").textContent = !lbl ? "type a name to preview" : (ok ? "ready — view the page" : "names need 3+ characters");
   document.getElementById("ncStatus").textContent = (ok || [...shown].length >= 3) ? "see page →" : "—";
   var ncLink = document.getElementById("ncLink"); if (ncLink) ncLink.href = ok ? "#/" + lbl + ".eth" : ([...shown].length >= 3 ? "#/" + shown + ".eth" : "#find");
   const hint = document.getElementById("searchHint");
-  if (hint) hint.textContent = !lbl ? "type a name to open its page" : (ok ? "press enter to open " + lbl + ".eth" : "names need at least 3 letters");
+  if (hint) hint.textContent = !lbl ? "type a name to open its page" : (ok ? "press enter to open " + lbl + ".eth" : "names need at least 3 characters");
   clearTimeout(searchDebounce);
   searchDebounce = setTimeout(() => {
     loadAvatar(shown);
@@ -676,7 +704,7 @@ if (searchInput) {
   searchForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const lbl = clean(searchInput.value);
-    if ([...lbl].length < 3) { const h=document.getElementById("searchHint"); if(h) h.textContent="names need at least 3 letters"; return; }
+    if ([...lbl].length < 3) { const h=document.getElementById("searchHint"); if(h) h.textContent="names need at least 3 characters"; return; }
     location.hash = "#/" + lbl + ".eth";
   });
   refreshSearchPreview();
@@ -893,7 +921,7 @@ async function renderProfile(name) {
 
   const label = name.replace(/\.eth$/, "");
   if ([...label].length < 3) {
-    body.innerHTML = '<div class="pf-error"><h3>' + esc(name) + '</h3><p>Names need at least 3 letters to extend here.</p></div>';
+    body.innerHTML = '<div class="pf-error"><h3>' + esc(name) + '</h3><p>Names need at least 3 characters to extend here.</p></div>';
     return;
   }
 
@@ -1068,7 +1096,7 @@ async function renderProfile(name) {
 
   // ----- viral loop wiring -----
   let baseUrl;
-  try { baseUrl = location.href.split("#")[0]; } catch (_) { baseUrl = ""; }
+  try { baseUrl = window.location.href.split("#")[0]; } catch (_) { baseUrl = ""; }
   const profileUrl = baseUrl + "#/" + name;
   const shareText = "help keep " + name + " alive \ud83c\udf31";
 
@@ -1084,10 +1112,14 @@ async function renderProfile(name) {
 
   // claim footer -> navigate to the typed name's page
   const claimForm = document.getElementById("claimForm");
-  if (claimForm) claimForm.addEventListener("submit", (e) => {
+  const claimInput = document.getElementById("claimInput");
+  if (claimForm && claimInput) claimForm.addEventListener("submit", (e) => {
     e.preventDefault();
-    const v = clean(document.getElementById("claimInput").value);
-    if ([...v].length >= 3) location.hash = "#/" + v + ".eth";
+    const v = clean(claimInput.value);
+    if ([...v].length < 3) { claimInput.focus(); return; }
+    const nextHash = "#/" + v + ".eth";
+    if (window.location.hash === nextHash) route();
+    else window.location.hash = nextHash;
   });
 
   // social proof: count this name's renewals from the on-chain Renewed event (best-effort).
