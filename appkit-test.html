@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>namepass AppKit mobile wallet test</title>
+  <title>namepass AppKit CDN mobile wallet test</title>
   <style>
     :root {
       --paper: #fdfbf7;
@@ -82,8 +82,8 @@
 </head>
 <body>
   <main class="card">
-    <h1>namepass AppKit test</h1>
-    <p>This is a plain single-file HTML test for Reown AppKit + ethers v6. Try this on mobile Safari/Chrome and inside wallet browsers.</p>
+    <h1>namepass AppKit CDN test</h1>
+    <p>This is a plain single-file HTML test for the pre-bundled Reown AppKit CDN build + ethers v6. Try this on mobile Safari/Chrome and inside wallet browsers.</p>
 
     <div class="row">
       <button id="connectBtn">Open AppKit</button>
@@ -104,9 +104,7 @@
   </main>
 
   <script type="module">
-    import { createAppKit } from 'https://cdn.jsdelivr.net/npm/@reown/appkit@1.8.20/+esm'
-    import { EthersAdapter } from 'https://cdn.jsdelivr.net/npm/@reown/appkit-adapter-ethers@1.8.20/+esm'
-    import { mainnet, base, arbitrum, optimism, polygon, worldchain } from 'https://cdn.jsdelivr.net/npm/@reown/appkit@1.8.20/networks/+esm'
+    import { createAppKit, EthersAdapter, mainnet, base, arbitrum, optimism, polygon, worldchain } from 'https://cdn.jsdelivr.net/npm/@reown/appkit-cdn@1.8.20/dist/appkit.js'
     import { BrowserProvider } from 'https://cdn.jsdelivr.net/npm/ethers@6.13.2/+esm'
 
     const projectId = '30e2ea901580311e378e5fb6eee06ee0'
