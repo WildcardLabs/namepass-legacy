@@ -652,13 +652,19 @@ async function connect({ info, provider }) {
   try {
     const accs = await provider.request({ method: "eth_requestAccounts" });
     account = accs[0]; selected = { info, provider };
-    try { await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: ARBITRUM_HEX }] }); } catch (_) {}
+
+    // Make the UI feel connected as soon as the wallet returns an account.
+    // Reverse-name/avatar lookup runs after this, and chain switching no longer blocks it.
     closeModal();
     setConnectButtonAccount(account);
+
     provider.on && provider.on("accountsChanged", (a) => {
       account = a[0] || null;
       setConnectButtonAccount(account);
     });
+
+    // Best-effort background switch. Do not delay the connected UI on this.
+    try { await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: ARBITRUM_HEX }] }); } catch (_) {}
   } catch (e) { alert("Could not connect: " + (e && e.message || e)); }
 }
 // Toggle: if already connected, clicking the button disconnects.
