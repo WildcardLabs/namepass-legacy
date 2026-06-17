@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>namepass — keep any .eth name alive</title>
+<title>namepass — your name, kept alive by your people</title>
+<meta name="description" content="Every .eth name already has a namepass. A page where your community chips in to keep your name from expiring — from any chain, renewed on Ethereum.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Patrick+Hand&display=swap" rel="stylesheet">
@@ -62,7 +63,7 @@
   .hero h2 { font-size: clamp(42px, 5.8vw, 62px); letter-spacing: -0.01em; }
   .hero h2 .headline-first { white-space: nowrap; }
   .hero h2 .uline { position: relative; white-space: nowrap; }
-  .hero h2 .uline svg { position: absolute; left: -2%; bottom: -14px; width: 104%; height: 16px; }
+  .hero h2 .uline svg { position: absolute; left: -2%; bottom: -8px; width: 104%; height: 16px; }
   .hero .lede { font-size: 20px; margin: 22px 0 0; max-width: 26em; color: #3a3a3a; }
   .hero .ticks { display: flex; gap: 20px; margin-top: 26px; flex-wrap: wrap; }
   .hero .ticks span { display: inline-flex; align-items: center; gap: 8px; font-size: 16px; }
@@ -87,6 +88,10 @@
   .nc-ava img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .nc-name { font-family: var(--display); font-weight: 700; font-size: 27px; line-height: 1.05; word-break: break-all; }
   .nc-state { font-size: 15px; color: #7a7a7a; }
+  a.nc-foot { text-decoration: none; cursor: pointer; color: inherit; }
+  a.nc-foot:hover .v { text-decoration: underline; }
+  .nc-ens-logo { width: 55px; height: auto; display: block; margin-bottom: 0; color: var(--ink); opacity: 1; }
+  .nc-desc { font-size: 13px; color: #7a7a7a; margin-top: 8px; max-height: 36px; overflow: hidden; line-height: 1.35; }
   .nc-foot { margin-top: 22px; padding-top: 16px; border-top: 2px dashed var(--muted); display: flex; justify-content: space-between; align-items: baseline; }
   .nc-foot .l { font-size: 15px; color: #8a8a8a; }
   .nc-foot .v { font-family: var(--display); font-weight: 700; font-size: 18px; }
@@ -199,6 +204,7 @@
 
   @media (max-width: 900px) {
     .hero { grid-template-columns: 1fr; gap: 36px; padding: 24px 0 40px; }
+    .stage { display: none; }
     .steps { grid-template-columns: 1fr; gap: 30px; }
     .how-head h3 { font-size: 34px; }
   }
@@ -235,7 +241,6 @@
   }
 
   @media (max-width: 900px) {
-    .hero-cta { display: inline-flex; }
   }
 
 
@@ -260,8 +265,7 @@
     .hero { grid-template-columns: 1fr; gap: 34px; padding: 28px 0 44px; }
     .hero > div:first-child { max-width: 680px; }
     .hero .lede { max-width: 32em; }
-    .stage { justify-content: center; }
-    .namecard { width: min(420px, 100%); }
+    .stage { display: none; }
 
     .panel-sec { padding-top: 4px; padding-bottom: 64px; }
 
@@ -287,7 +291,6 @@
   }
 
   @media (min-width: 561px) and (max-width: 900px) {
-    .hero-cta { display: inline-flex; }
     .namecard, .panel, .modal { box-shadow: 6px 6px 0 var(--ink); }
     .how { padding-top: 24px; padding-bottom: 72px; }
   }
@@ -317,7 +320,9 @@
     margin-top: -52px; display: grid; place-items: center; font-family: var(--display); font-weight: 700; font-size: 46px;
     overflow: hidden; box-shadow: 4px 4px 0 var(--ink); transform: rotate(-2deg); position: relative; }
   .pf-ava img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .pf-name { font-family: var(--display); font-weight: 700; font-size: 34px; margin-top: 14px; word-break: break-all; }
+  .usdc-mark { width: 16px; height: 16px; vertical-align: -2px; display: inline; color: #2775ca; }
+  .ens-mark { width: 22px; height: 22px; display: inline-block; margin-left: 6px; color: #5298ff; vertical-align: -0.02em; }
+  .pf-name { font-family: var(--display); font-weight: 700; font-size: 34px; margin-top: 14px; word-break: break-all; line-height: 1.08; }
   .pf-desc { font-size: 17px; color: #4a4a4a; margin-top: 6px; max-width: 46ch; }
   .pf-stats { display: flex; gap: 22px; margin-top: 16px; flex-wrap: wrap; }
   .pf-stat { display: inline-flex; align-items: baseline; gap: 6px; font-size: 16px; color: #6b6b6b; }
@@ -348,6 +353,8 @@
   .chainbadge { display: inline-flex; align-items: center; gap: 6px; font-family: var(--hand); font-size: 14px; color: var(--ink);
     border: 2px solid var(--ink); background: #fff; padding: 5px 11px; border-radius: var(--wobbly-sm); box-shadow: 2px 2px 0 var(--ink); }
   .chainbadge svg { width: 15px; height: 15px; color: var(--blue); }
+  .chainbadge[title="Base"] svg { width: 12px; height: 12px; }
+  .chainbadge svg.base-logo { width: 12px; height: 12px; flex: 0 0 12px; }
 
   /* search panel */
   .searchpanel { max-width: 540px; text-align: center; }
@@ -378,6 +385,8 @@
 
 
   /* profile share + social proof + viral footer */
+  .pf-expiry { margin-top: 10px; font-size: 14px; color: #6b6b6b; }
+  .pf-expiry b { font-family: var(--display); font-weight: 700; color: var(--ink); }
   .pf-keptalive { display: inline-flex; align-items: center; gap: 7px; font-size: 14px; color: #6b6b6b; margin-top: 14px;
     background: var(--yellow); border: 2px solid var(--ink); padding: 5px 12px; border-radius: var(--wobbly-sm); box-shadow: 2px 2px 0 var(--ink); }
   .pf-keptalive b { font-family: var(--display); font-weight: 700; color: var(--ink); }
@@ -399,6 +408,21 @@
   .pf-poweredby { text-align: center; font-size: 13px; color: #9a9a9a; margin: 22px 0 0; }
   .pf-poweredby a { color: #7a7a7a; font-weight: 700; }
 
+
+  /* network switcher dropdown */
+  .netmenu { position: absolute; top: 52px; right: 0; z-index: 60; background: #fff; border: 3px solid var(--ink);
+    border-radius: var(--wobbly-sm); box-shadow: 5px 5px 0 var(--ink); padding: 6px; min-width: 168px; }
+  .netmenu button { display: flex; align-items: center; gap: 9px; width: 100%; text-align: left; border: none; background: none;
+    font-family: var(--hand); font-size: 15px; color: var(--ink); padding: 9px 11px; cursor: pointer; border-radius: 8px; }
+  .netmenu button:hover { background: var(--yellow); }
+  .netmenu button.cur { font-weight: 700; }
+  .netmenu button svg { width: 15px; height: 15px; color: var(--blue); }
+  #netChip { cursor: pointer; }
+
+  @media (max-width: 560px) {
+    .nc-ens-logo { width: 55px; }
+  }
+
 </style>
 </head>
 <body>
@@ -412,13 +436,17 @@
           <path d="M16 16.5v6M13 19.5h6" stroke="#2d2d2d" stroke-width="2.2" stroke-linecap="round"/>
         </svg>
       </div>
-      <div><h1>namepass</h1><p>keep any .eth name alive</p></div>
+      <div><h1>namepass</h1><p>for names worth keeping</p></div>
     </a>
     <div class="nav-right">
-      <span class="chip">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M12 2l9 5v10l-9 5-9-5V7l9-5z" stroke="#2d2d2d" stroke-width="2" stroke-linejoin="round"/></svg>
-        Arbitrum
-      </span>
+      <div class="netwrap" id="netWrap" style="display:none; position:relative;">
+        <button class="chip" id="netChip" type="button">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 2l9 5v10l-9 5-9-5V7l9-5z" stroke="#2d2d2d" stroke-width="2" stroke-linejoin="round"/></svg>
+          <span id="netLabel">Arbitrum</span>
+          <svg viewBox="0 0 24 24" fill="none" style="width:13px;height:13px"><path d="M6 9l6 6 6-6" stroke="#2d2d2d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="netmenu" id="netMenu" style="display:none;"></div>
+      </div>
       <button class="btn" id="connectBtn">Connect wallet</button>
     </div>
   </nav>
@@ -429,31 +457,36 @@
 
   <section class="hero">
     <div>
-      <span class="tag-pill">every .eth name already has a page</span>
+      <span class="tag-pill">for .eth name owners and their communities</span>
       <h2><span class="headline-first">Your name,</span>
-        <span class="uline">kept alive<svg viewBox="0 0 300 16" preserveAspectRatio="none"><path d="M3 11 C 70 4, 150 14, 297 6" stroke="#ff4d4d" stroke-width="5" fill="none" stroke-linecap="round"/></svg></span>
-        by your people.</h2>
-      <p class="lede">Every .eth name already has a namepass — a page where the people who value your work chip in a few dollars of USDC to keep your name from expiring. No setup, no gas to figure out. It's already yours.</p>
+        kept alive by
+        <span class="uline">your people.<svg viewBox="0 0 300 16" preserveAspectRatio="none"><path d="M3 11 C 70 4, 150 14, 297 6" stroke="#ff4d4d" stroke-width="5" fill="none" stroke-linecap="round"/></svg></span></h2>
+      <p class="lede">Every .eth name already has a namepass — a page where the people who value your work chip in a few dollars to keep your name from expiring. No setup, no gas to figure out. It's already yours.</p>
       <div class="chainrow">
-        <span class="chainrow-lbl">pay from</span>
-        <span class="chainbadge" title="Ethereum"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2l6 10-6 4-6-4 6-10z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M6 13l6 4 6-4-6 9-6-9z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg> Ethereum</span>
-        <span class="chainbadge" title="Arbitrum"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2l9 5v10l-9 5-9-5V7l9-5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg> Arbitrum</span>
-        <span class="chainbadge" title="Base"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/></svg> Base</span>
-        <span class="chainbadge" title="Polygon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg> Polygon</span>
-        <span class="chainbadge" title="Optimism"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M8 12h2M14 12h2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg> Optimism</span>
+        <span class="chainrow-lbl">works across</span>
+        <span class="chainbadge" title="Ethereum"><svg viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon fill="#2F3030" points="249.982,6.554 397.98,251.112 250.53,188.092 "/> <polygon fill="#828384" points="102.39,251.112 249.982,6.554 250.53,188.092 "/> <polygon fill="#343535" points="249.982,341.285 102.39,251.112 250.53,188.092 "/> <polygon fill="#131313" points="397.98,251.112 250.53,188.092 249.982,341.285 "/> <polygon fill="#2F3030" points="249.982,372.329 397.98,284.597 249.982,493.13 "/> <polygon fill="#828384" points="249.982,372.329 102.39,284.597 249.982,493.13 "/></svg> Ethereum</span>
+        <span class="chainbadge" title="Arbitrum"><svg viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg"><g> <path fill="#213147" d="M45.3,152V348c0,12.5,6.6,24,17.5,30.3l169.8,98c10.8,6.2,24.1,6.2,35,0l169.8-98 c10.8-6.2,17.5-17.8,17.5-30.3V152c0-12.5-6.6-24-17.5-30.3l-169.8-98c-10.8-6.2-24.1-6.2-35,0l-169.8,98 C52,127.9,45.3,139.5,45.3,152z"/> <g> <g> <g> <path fill="#12AAFF" d="M287.1,288l-24.2,66.4c-0.7,1.8-0.7,3.9,0,5.7l41.6,114.2l48.2-27.8L294.9,288 C293.6,284.3,288.5,284.3,287.1,288z"/> </g> <g> <path fill="#12AAFF" d="M335.6,176.3c-1.3-3.7-6.4-3.7-7.8,0l-24.2,66.4c-0.7,1.8-0.7,3.9,0,5.7l68.2,187.1l48.2-27.8L335.6,176.3z "/> </g> </g> </g> <path fill="#9DCCED" d="M250,31c1.2,0,2.4,0.3,3.5,0.9L437.2,138c2.1,1.2,3.5,3.5,3.5,5.9V356c0,2.5-1.3,4.7-3.5,5.9L253.5,468.1 c-1,0.6-2.2,0.9-3.5,0.9s-2.4-0.3-3.5-0.9L62.9,362c-2.1-1.2-3.5-3.5-3.5-5.9V143.9c0-2.5,1.3-4.7,3.5-5.9L246.6,31.9 C247.6,31.3,248.9,31,250,31 M250,0c-6.5,0-13.1,1.7-18.9,5.1L47.4,111.2c-11.7,6.7-18.9,19.2-18.9,32.7V356 c0,13.5,7.3,26.1,18.9,32.8l183.7,106.1c5.8,3.4,12.4,5.1,18.9,5.1c6.5,0,13.1-1.7,18.9-5.1l183.7-106.1 c11.8-6.7,18.9-19.2,18.9-32.8V143.9c0-13.5-7.3-26.1-18.9-32.8L269,5.1C263.1,1.7,256.5,0,250,0L250,0z"/> <polygon fill="#213147" points="128.6,435.7 145.5,389.4 179.4,417.7 147.7,446.7 "/> <g> <path fill="#FFFFFF" d="M234.6,128.8H188c-3.5,0-6.6,2.1-7.8,5.4L80.4,407.9l48.2,27.8l109.9-301.4 C239.5,131.6,237.5,128.8,234.6,128.8z"/> <path fill="#FFFFFF" d="M316.1,128.8h-46.5c-3.5,0-6.6,2.1-7.8,5.4l-114,312.5l48.2,27.8L320,134.4 C321,131.6,318.9,128.8,316.1,128.8z"/> </g> </g></svg> Arbitrum</span>
+        <span class="chainbadge" title="Base"><svg class="base-logo" viewBox="0 0 1280 1280" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M0,101.12c0-34.64,0-51.95,6.53-65.28,6.25-12.76,16.56-23.07,29.32-29.32C49.17,0,66.48,0,101.12,0h1077.76c34.63,0,51.96,0,65.28,6.53,12.75,6.25,23.06,16.56,29.32,29.32,6.52,13.32,6.52,30.64,6.52,65.28v1077.76c0,34.63,0,51.96-6.52,65.28-6.26,12.75-16.57,23.06-29.32,29.32-13.32,6.52-30.65,6.52-65.28,6.52H101.12c-34.64,0-51.95,0-65.28-6.52-12.76-6.26-23.07-16.57-29.32-29.32-6.53-13.32-6.53-30.65-6.53-65.28V101.12Z" fill="#0052FF"/></svg> Base</span>
+        <span class="chainbadge" title="Polygon"><svg viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="#8247E5" d="M377.3,163.9c-9.2-5.4-21.2-5.4-31.4,0l-72,41.7l-48.9,27.2l-72,41.7c-9.2,5.4-21.2,5.4-31.4,0l-57.2-32.6 c-9.2-5.4-15.7-15.4-15.7-26.3v-64.3c0-10.9,5.5-20.8,15.7-26.3l56.3-31.7c9.2-5.4,21.2-5.4,31.4,0l56.3,31.7 c9.2,5.4,15.7,15.4,15.7,26.3v41.7l48.9-28.1v-41.7c0-10.9-5.5-20.8-15.7-26.3L153.1,37.1c-9.2-5.4-21.2-5.4-31.4,0L15.7,96.9 C5.5,102.3,0,112.3,0,123.2v120.5c0,10.9,5.5,20.8,15.7,26.3l106.1,59.8c9.2,5.4,21.2,5.4,31.4,0l72-40.8l48.9-28.1l72-40.8 c9.2-5.4,21.2-5.4,31.4,0l56.3,31.7c9.2,5.4,15.7,15.4,15.7,26.3v64.3c0,10.9-5.5,20.8-15.7,26.3l-56.3,32.6 c-9.2,5.4-21.2,5.4-31.4,0l-56.3-31.7c-9.2-5.4-15.7-15.4-15.7-26.3v-41.7l-48.9,28.1v41.7c0,10.9,5.5,20.8,15.7,26.3l106.1,59.8 c9.2,5.4,21.2,5.4,31.4,0l106.1-59.8c9.2-5.4,15.7-15.4,15.7-26.3V250.9c0-10.9-5.5-20.8-15.7-26.3L377.3,163.9z"/></svg> Polygon</span>
+        <span class="chainbadge" title="Optimism"><svg viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="250" cy="250" r="250" fill="#FF0420"/> <path d="M177.133 316.446C162.247 316.446 150.051 312.943 140.544 305.938C131.162 298.808 126.471 288.676 126.471 275.541C126.471 272.789 126.784 269.411 127.409 265.408C129.036 256.402 131.35 245.581 134.352 232.947C142.858 198.547 164.812 181.347 200.213 181.347C209.845 181.347 218.476 182.973 226.107 186.225C233.738 189.352 239.742 194.106 244.12 200.486C248.498 206.74 250.688 214.246 250.688 223.002C250.688 225.629 250.375 228.944 249.749 232.947C247.873 244.08 245.621 254.901 242.994 265.408C238.616 282.546 231.048 295.368 220.29 303.874C209.532 312.255 195.147 316.446 177.133 316.446ZM179.76 289.426C186.766 289.426 192.707 287.362 197.586 283.234C202.59 279.106 206.155 272.789 208.281 264.283C211.158 252.524 213.348 242.266 214.849 233.51C215.349 230.883 215.599 228.194 215.599 225.441C215.599 214.058 209.657 208.366 197.774 208.366C190.768 208.366 184.764 210.43 179.76 214.558C174.882 218.687 171.379 225.004 169.253 233.51C167.001 241.891 164.749 252.149 162.498 264.283C161.997 266.784 161.747 269.411 161.747 272.163C161.747 283.672 167.752 289.426 179.76 289.426Z" fill="white"/> <path d="M259.303 314.57C257.927 314.57 256.863 314.132 256.113 313.256C255.487 312.255 255.3 311.13 255.55 309.879L281.444 187.914C281.694 186.538 282.382 185.412 283.508 184.536C284.634 183.661 285.822 183.223 287.073 183.223H336.985C350.87 183.223 362.003 186.1 370.384 191.854C378.891 197.609 383.144 205.927 383.144 216.81C383.144 219.937 382.769 223.19 382.018 226.567C378.891 240.953 372.574 251.586 363.067 258.466C353.685 265.346 340.8 268.786 324.413 268.786H299.082L290.451 309.879C290.2 311.255 289.512 312.38 288.387 313.256C287.261 314.132 286.072 314.57 284.822 314.57H259.303ZM325.727 242.892C330.98 242.892 335.546 241.453 339.424 238.576C343.427 235.699 346.054 231.571 347.305 226.192C347.68 224.065 347.868 222.189 347.868 220.563C347.868 216.935 346.805 214.183 344.678 212.307C342.551 210.305 338.924 209.305 333.795 209.305H311.278L304.148 242.892H325.727Z" fill="white"/></svg> Optimism</span>
       </div>
-      <a class="hero-cta" href="#find">Find a name</a>
     </div>
     <div class="stage">
       <div class="pin"></div>
       <div class="namecard" id="namecard">
         <div class="nc-tape"></div>
-        <div class="nc-top"><span class="lbl">ENS name</span></div>
+        <div class="nc-top"><svg class="nc-ens-logo" viewBox="0 0 300 94" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<path d="M270.119 82.3988C254.461 82.3988 241.388 76.1878 239.652 61.3515C239.598 60.8924 239.929 60.4768 240.387 60.4182L256.452 58.3615C256.955 58.2971 257.401 58.6827 257.446 59.1884C258.09 66.5786 263.318 69.9176 270.521 69.9176C278.159 69.9176 282.044 67.0992 282.044 62.1335C282.044 57.7047 276.953 56.0942 266.367 53.5443C253.503 50.4575 241.711 46.4313 241.711 32.6079C241.711 17.8451 254.709 12.0742 269.181 12.0742C283.656 12.0742 296.063 16.8631 298.154 31.525C298.218 31.9776 297.906 32.3997 297.456 32.4765L281.924 35.1295C281.417 35.2161 280.95 34.8377 280.896 34.3255C280.178 27.4881 275.854 24.4213 269.449 24.4213C263.955 24.4213 259.399 26.4344 259.399 31.1317C259.399 35.6947 264.223 37.3052 273.201 39.3183C285.126 42.0024 300 45.2234 300 61.1941C300 77.299 285.796 82.3988 270.119 82.3988Z" fill="currentColor"/>
+<path d="M229.159 18.464C234.519 23.8323 235.189 31.0795 235.189 39.803V80.9511C235.189 81.4268 234.804 81.8125 234.329 81.8125H217.156C216.681 81.8125 216.296 81.4268 216.296 80.9511V41.4134C216.296 35.2399 215.76 32.0189 212.812 29.2006C210.4 26.9191 208.122 26.5164 204.102 26.5164C198.34 26.5164 191.64 30.4084 191.64 44.2318V80.9511C191.64 81.4268 191.255 81.8125 190.78 81.8125H173.741C173.266 81.8125 172.881 81.4268 172.881 80.9511V14.6281C172.881 14.1524 173.266 13.7667 173.741 13.7667H190.646C191.121 13.7667 191.506 14.1524 191.506 14.6281V21.9314C191.506 22.344 192.118 22.4745 192.31 22.1093C196.08 14.936 203.246 12.1562 211.338 12.1562C219.914 12.1562 224.871 14.1694 229.159 18.464Z" fill="currentColor"/>
+<path d="M158.035 20.7042C164.541 27.3302 167.818 37.4008 168.094 50.1542C168.104 50.623 167.733 51.0117 167.266 51.0265L119.959 52.5242C119.481 52.5394 119.105 52.9456 119.138 53.4242C119.872 64.1042 125.381 69.4054 135.163 69.0957C143.417 68.8344 147.583 65.0913 148.88 58.5475C148.966 58.1142 149.352 57.7998 149.792 57.8247L166.268 58.7565C166.799 58.7866 167.175 59.2901 167.045 59.8062C163.383 74.3043 152.478 81.8407 135.582 82.3756C125.136 82.7063 116.726 79.6157 110.927 74.2941C104.3 68.193 100.806 59.4415 100.45 48.1737C100.112 37.4425 102.77 28.2277 109.134 21.7153C114.845 15.7607 122.783 12.421 133.23 12.0903C143.81 11.7553 152.22 14.8459 158.035 20.7042ZM133.64 25.1019C128.149 25.2758 124.316 27.0084 121.877 30.4425C120.239 32.6962 119.284 35.4855 118.91 38.712C118.851 39.222 119.265 39.6559 119.777 39.6396L147.737 38.7544C148.244 38.7384 148.628 38.2871 148.549 37.7848C147.962 34.0559 146.778 30.9359 144.478 28.6528C141.848 26.0505 138.462 24.9493 133.64 25.1019Z" fill="currentColor"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M42.4734 1.5491C42.1294 1.02598 42.7618 0.413402 43.2749 0.772602L64.7575 15.8095C78.2972 25.2867 84.5315 42.208 80.2388 58.1544C79.8987 59.4177 79.5339 60.5235 79.1912 61.45C78.9787 62.0244 78.134 61.9004 78.0914 61.2895C77.7292 56.0972 73.9905 50.1611 71.2769 45.8527C70.7925 45.0835 70.3408 44.3663 69.9467 43.7144C67.3093 39.3512 48.2169 10.2849 42.4734 1.5491ZM14.0286 43.8411L39.7425 1.53062C40.0411 1.03949 39.5038 0.466613 38.9939 0.732504C34.4986 3.07609 22.3693 9.85687 12.8466 19.3674C2.41081 29.7898 10.8445 41.225 13.1082 43.9128C13.3584 44.2098 13.8269 44.1729 14.0286 43.8411ZM39.1069 92.8848C39.4509 93.4079 38.8185 94.0205 38.3054 93.6614L16.8228 78.6244C3.28314 69.1472 -2.95117 52.2259 1.34153 36.2795C1.68156 35.0162 2.04642 33.9104 2.38911 32.9839C2.6016 32.4095 3.44632 32.5335 3.48892 33.1444C3.85109 38.3366 7.58981 44.2728 10.3034 48.5812C10.7878 49.3503 11.2395 50.0676 11.6336 50.7195C14.271 55.0827 33.3634 84.149 39.1069 92.8848ZM41.8398 92.8988L67.5538 50.5883C67.7555 50.2566 68.224 50.2196 68.4742 50.5166C70.7379 53.2044 79.1716 64.6396 68.7358 75.062C59.2131 84.5725 47.0838 91.3533 42.5886 93.6969C42.0786 93.9628 41.5413 93.3899 41.8398 92.8988Z" fill="currentColor"/>
+</svg></div>
         <div class="nc-id">
           <div class="nc-ava" id="avatar"><span id="avatarLetter">V</span></div>
           <div><div class="nc-name" id="namePreview">vitalik.eth</div><div class="nc-state" id="nameState">type a name to preview</div></div>
         </div>
-        <div class="nc-foot"><span class="l">status</span><span class="v" id="ncStatus">has a page →</span></div>
+        <div class="nc-desc" id="ncDesc"></div>
+        <a class="nc-foot" id="ncLink" href="#/vitalik.eth"><span class="l">namepass</span><span class="v" id="ncStatus">see page →</span></a>
         <svg class="doodle-arrow" viewBox="0 0 60 50" fill="none"><path d="M55 6 C 30 0, 8 18, 6 42" stroke="#2d5da1" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-dasharray="3 5"/><path d="M2 34l4 9 9-5" stroke="#2d5da1" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
     </div>
@@ -463,7 +496,7 @@
 <div class="wrap panel-sec" id="find">
   <div class="panel searchpanel">
     <h3>See your page</h3>
-    <p class="psub">you didn't make it — it's been here all along</p>
+    <p class="psub">every .eth name already has one</p>
     <form id="searchForm" class="searchrow">
       <div class="field"><input id="searchInput" value="" autocomplete="off" spellcheck="false" placeholder="yourname" /><span class="suffix">.eth</span></div>
       <button class="cta searchbtn" type="submit">See your page →</button>
@@ -482,13 +515,14 @@
   <div class="how-head"><h3>How it works</h3><span class="sq">three steps. that's it.</span></div>
   <div class="steps">
     <div class="step"><div class="num">1</div><h4>Share your page</h4><p>Your namepass already exists, built from your onchain profile. Drop the link wherever your people are — bio, posts, anywhere.</p></div>
-    <div class="step"><div class="num">2</div><h4>Your people chip in</h4><p>Anyone can add time to your name with a few dollars of USDC, from whichever chain they already hold it on — Ethereum, Arbitrum, Base, Polygon, or Optimism.</p></div>
-    <div class="step"><div class="num">3</div><h4>Your name stays alive</h4><p>Their USDC goes straight to renewing your name on Ethereum — pushing out the expiry, confirmed live onchain. It adds time, not income.</p></div>
+    <div class="step"><div class="num">2</div><h4>Your people chip in</h4><p>Anyone can add time to your name with a few dollars, from whichever payment method they already use.</p></div>
+    <div class="step"><div class="num">3</div><h4>Your name stays alive</h4><p>Their payment goes straight to renewing your name on Ethereum — pushing out the expiry, confirmed live onchain. It adds time.</p></div>
   </div>
 </div>
 
-<details class="dev"><summary>developer details</summary><pre id="devOut">No activity yet. Open a name’s page and extend it to see the quote, the Arbitrum payment, and the mainnet Renewed event here.</pre></details>
-
+<footer style="text-align:center; padding: 50px 24px 36px;">
+  <p style="font-size:15px;color:#aaa;">namepass is free and <a href="https://github.com/WildcardLabs/namepass" target="_blank" rel="noopener" style="color:inherit;"><strong><u>open source</u></strong></a> ❤️</p>
+</footer>
 </div><!-- /view-home -->
 
 <div id="view-profile" class="view">
@@ -512,6 +546,15 @@
 <script>
 const ENDPOINT = "https://arbitrum-renew-ens-905612704113.europe-west1.run.app";
 const ARBITRUM_HEX = "0xa4b1";
+// Supported origin chains (UI multi-chain; dev backend settles via Arbitrum only).
+const CHAINS = {
+  ethereum: { hex: "0x1",    label: "Ethereum" },
+  arbitrum: { hex: "0xa4b1", label: "Arbitrum" },
+  base:     { hex: "0x2105", label: "Base" },
+  polygon:  { hex: "0x89",   label: "Polygon" },
+  optimism: { hex: "0xa",    label: "Optimism" },
+};
+const HEX_TO_CHAIN = Object.fromEntries(Object.entries(CHAINS).map(([k,v]) => [v.hex, v.label]));
 const MAINNET_RPC = "https://ethereum-rpc.publicnode.com";
 const RENEWED_ABI = ["event Renewed(bytes32 indexed paymentId, bytes32 indexed labelHash, bytes32 indexed referrer, string label, uint256 duration, uint256 costWei, uint256 ethProvided)"];
 let providers = [], selected = null, account = null;
@@ -536,6 +579,35 @@ const closeModal = () => document.getElementById("modalBg").classList.remove("sh
 document.getElementById("closeModal").onclick = closeModal;
 document.getElementById("modalBg").onclick = (e) => { if (e.target.id === "modalBg") closeModal(); };
 document.getElementById("connectBtn").onclick = () => { if (!account) openModal(); };
+// ----- network chip (only visible when a wallet is connected) -----
+function setNetChip(hexChainId) {
+  const lbl = HEX_TO_CHAIN[hexChainId] || "Unsupported";
+  const el = document.getElementById("netLabel"); if (el) el.textContent = lbl;
+  buildNetMenu(hexChainId);
+}
+function buildNetMenu(currentHex) {
+  const menu = document.getElementById("netMenu"); if (!menu) return;
+  menu.innerHTML = "";
+  Object.entries(CHAINS).forEach(([key, c]) => {
+    const b = document.createElement("button");
+    if (c.hex === currentHex) b.className = "cur";
+    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M12 2l9 5v10l-9 5-9-5V7l9-5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>' + c.label + (c.hex === currentHex ? " ✓" : "");
+    b.onclick = async () => {
+      menu.style.display = "none";
+      if (!selected) return;
+      try { await selected.provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: c.hex }] }); } catch (_) {}
+    };
+    menu.appendChild(b);
+  });
+}
+function showNetChip() { const w = document.getElementById("netWrap"); if (w) w.style.display = "block"; }
+function hideNetChip() { const w = document.getElementById("netWrap"); if (w) w.style.display = "none"; }
+(function wireNetChipToggle(){
+  const chip = document.getElementById("netChip"), menu = document.getElementById("netMenu");
+  if (chip) chip.onclick = (e) => { e.stopPropagation(); if (menu) menu.style.display = menu.style.display === "none" ? "block" : "none"; };
+  document.addEventListener("click", () => { if (menu) menu.style.display = "none"; });
+})();
+
 async function connect({ info, provider }) {
   try {
     const accs = await provider.request({ method: "eth_requestAccounts" });
@@ -543,10 +615,15 @@ async function connect({ info, provider }) {
     try { await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: ARBITRUM_HEX }] }); } catch (_) {}
     closeModal();
     document.getElementById("connectBtn").textContent = account.slice(0,6) + "\u2026" + account.slice(-4);
+    // reveal + populate the network chip
+    showNetChip();
+    try { const cid = await provider.request({ method: "eth_chainId" }); setNetChip(cid); } catch (_) { setNetChip(ARBITRUM_HEX); }
     provider.on && provider.on("accountsChanged", (a) => {
       account = a[0] || null;
       document.getElementById("connectBtn").textContent = account ? account.slice(0,6) + "\u2026" + account.slice(-4) : "Connect wallet";
+      if (!account) hideNetChip();
     });
+    provider.on && provider.on("chainChanged", (cid) => { setNetChip(cid); });
   } catch (e) { alert("Could not connect: " + (e && e.message || e)); }
 }
 const clean = (n) => { n = (n||"").trim().toLowerCase(); return n.endsWith(".eth") ? n.slice(0,-4) : n; };
@@ -582,6 +659,22 @@ function loadAvatar(lbl) {
   tryNext();
 }
 
+let descSeq = 0;
+async function loadPreviewDesc(lbl) {
+  const seq = ++descSeq;
+  const el = document.getElementById("ncDesc");
+  if (!el) return;
+  if ([...lbl].length < 3) { el.textContent = ""; return; }
+  try {
+    const r = await fetch("https://api.resolvio.xyz/ens/v2/profile/" + encodeURIComponent(lbl + ".eth"));
+    if (seq !== descSeq) return;
+    if (!r.ok) { el.textContent = ""; return; }
+    const data = await r.json();
+    const desc = (data.texts || []).find(t => t.key === "description" && t.exists);
+    el.textContent = desc ? desc.value : "";
+  } catch (_) { if (seq === descSeq) el.textContent = ""; }
+}
+
 /* ---- homepage search box: live preview on the namecard + navigate to profile ---- */
 const searchInput = document.getElementById("searchInput");
 const searchForm = document.getElementById("searchForm");
@@ -593,11 +686,15 @@ function refreshSearchPreview() {
   setAvatarLetter(shown);
   const ok = [...lbl].length >= 3;
   document.getElementById("nameState").textContent = !lbl ? "type a name to preview" : (ok ? "ready — view the page" : "names need 3+ letters");
-  document.getElementById("ncStatus").textContent = ok ? "has a page →" : "—";
+  document.getElementById("ncStatus").textContent = (ok || [...shown].length >= 3) ? "see page →" : "—";
+  var ncLink = document.getElementById("ncLink"); if (ncLink) ncLink.href = ok ? "#/" + lbl + ".eth" : ([...shown].length >= 3 ? "#/" + shown + ".eth" : "#find");
   const hint = document.getElementById("searchHint");
   if (hint) hint.textContent = !lbl ? "type a name to open its page" : (ok ? "press enter to open " + lbl + ".eth" : "names need at least 3 letters");
   clearTimeout(searchDebounce);
-  searchDebounce = setTimeout(() => loadAvatar(shown), 350);
+  searchDebounce = setTimeout(() => {
+    loadAvatar(shown);
+    loadPreviewDesc(shown);
+  }, 350);
 }
 if (searchInput) {
   searchInput.addEventListener("input", refreshSearchPreview);
@@ -788,15 +885,13 @@ function showView(id) {
 }
 
 const SOCIALS = {
-  "com.twitter": { label: "Twitter", base: "https://twitter.com/",
-    icon: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 4l16 16M20 4L4 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>' },
-  "com.github": { label: "GitHub", base: "https://github.com/",
-    icon: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/></svg>' },
-  "org.telegram": { label: "Telegram", base: "https://t.me/",
-    icon: '<svg viewBox="0 0 24 24" fill="none"><path d="M21 4L3 11l5 2 2 6 3-4 5 3 3-14z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>' },
-  "com.discord": { label: "Discord", base: null,
-    icon: '<svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="13" r="1.5" fill="currentColor"/><circle cx="15" cy="13" r="1.5" fill="currentColor"/></svg>' },
-  "com.youtube": { label: "YouTube", base: "https://youtube.com/@",
+  "com.twitter": { base: "https://twitter.com/",
+    icon: '<svg viewBox="0 0 24 24" fill="none"><path d="M3 3l7.2 8.4M21 3l-8.8 9.6m0 0L3 21m9.2-8.4L21 21" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+  "com.github": { base: "https://github.com/",
+    icon: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.7C6.7 20 6.1 18 6.1 18c-.4-1.1-1.1-1.4-1.1-1.4-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.8.8.1-.6.3-1.1.6-1.3-2.2-.3-4.5-1.1-4.5-5 0-1.1.4-2 1-2.7-.1-.3-.5-1.3.1-2.7 0 0 .8-.3 2.8 1a9.6 9.6 0 0 1 5 0c1.9-1.3 2.8-1 2.8-1 .6 1.4.2 2.4.1 2.7.7.7 1 1.6 1 2.7 0 3.9-2.3 4.7-4.5 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5A10 10 0 0 0 22 12c0-5.5-4.5-10-10-10z" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>' },
+  "org.telegram": { base: "https://t.me/",
+    icon: '<svg viewBox="0 0 24 24" fill="none"><path d="M22 3L2 11l6 2.5m14-10.5l-14 10.5m14-10.5l-5 18-3.5-7.5m-5.5-3L14 14" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>' },
+  "com.youtube": { base: "https://youtube.com/@",
     icon: '<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="3" stroke="currentColor" stroke-width="2"/><path d="M10 9l5 3-5 3V9z" fill="currentColor"/></svg>' },
 };
 
@@ -829,27 +924,37 @@ async function renderProfile(name) {
 
   const avatar = profile ? txt(profile, "avatar") : null;
   const header = profile ? txt(profile, "header") : null;
+  // Use the actual ENS name as the profile title. Do not use the ENS "name" text record here,
+  // because it can point to a different name and confuse the profile identity.
   const desc = profile ? txt(profile, "description") : null;
   const url = profile ? txt(profile, "url") : null;
+  const location = profile ? txt(profile, "location") : null;
+  const email = profile ? txt(profile, "email") : null;
   const ethAddr = profile && profile.addresses ? (profile.addresses.find((a) => a.coin === 60 && a.exists) || {}).value : null;
+  const contenthash = profile && profile.contenthash && profile.contenthash.exists ? profile.contenthash.value : null;
 
-  // social links
+  // Build the link row from every record that has a real, openable destination.
+  // (Discord is intentionally excluded: a username has no resolvable profile URL.)
   let links = "";
+  if (url) {
+    let u = url.startsWith("http") ? url : "https://" + url;
+    links += '<a class="pf-link" href="' + esc(u) + '" target="_blank" rel="noopener">' +
+      '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" stroke="currentColor" stroke-width="1.6"/></svg>' +
+      esc(url.replace(/^https?:\/\//, "")) + '</a>';
+  }
   for (const key in SOCIALS) {
     const v = profile ? txt(profile, key) : null;
     if (!v) continue;
-    const s = SOCIALS[key];
-    const href = s.base ? s.base + encodeURIComponent(v) : null;
-    const inner = s.icon + esc(v);
-    links += href
-      ? '<a class="pf-link" href="' + href + '" target="_blank" rel="noopener">' + inner + '</a>'
-      : '<span class="pf-link">' + inner + '</span>';
+    const sx = SOCIALS[key];
+    links += '<a class="pf-link" href="' + sx.base + encodeURIComponent(v) + '" target="_blank" rel="noopener">' + sx.icon + esc(v) + '</a>';
   }
-  if (url) {
-    let u = url.startsWith("http") ? url : "https://" + url;
-    links = '<a class="pf-link" href="' + esc(u) + '" target="_blank" rel="noopener">' +
-      '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" stroke="currentColor" stroke-width="1.6"/></svg>' +
-      esc(url) + '</a>' + links;
+  if (email) {
+    links += '<a class="pf-link" href="mailto:' + esc(email) + '">' +
+      '<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>' + esc(email) + '</a>';
+  }
+  if (contenthash) {
+    links += '<a class="pf-link" href="https://' + esc(name) + '.limo" target="_blank" rel="noopener">' +
+      '<svg viewBox="0 0 24 24" fill="none"><path d="M4 20V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/><path d="M4 20h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="15" cy="13" r="1" fill="currentColor"/></svg>Limo</a>';
   }
 
   const followers = stats && typeof stats.followers_count !== "undefined" ? stats.followers_count : null;
@@ -860,14 +965,16 @@ async function renderProfile(name) {
       <div class="pf-banner">${header ? '<img src="'+esc(header)+'" alt="" referrerpolicy="no-referrer" onerror="this.remove()">' : ''}</div>
       <div class="pf-head">
         <div class="pf-ava" id="pfAva">${avatar ? '<img src="'+esc(avatar)+'" alt="" referrerpolicy="no-referrer" onerror="this.remove()">' : esc(label[0].toUpperCase())}</div>
-        <div class="pf-name">${esc(name)}</div>
+        <div class="pf-name"><span>${esc(name)}</span><svg class="ens-mark" viewBox="0 0 202 231" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M98.3592 2.80337L34.8353 107.327C34.3371 108.147 33.1797 108.238 32.5617 107.505C26.9693 100.864 6.13478 72.615 31.9154 46.8673C55.4403 23.3726 85.4045 6.62129 96.5096 0.831705C97.7695 0.174847 99.0966 1.59007 98.3592 2.80337Z" fill="#0080BC"/> <path d="M94.8459 230.385C96.1137 231.273 97.6758 229.759 96.8261 228.467C82.6374 206.886 35.4713 135.081 28.9559 124.302C22.5295 113.67 9.88976 96.001 8.83534 80.8842C8.7301 79.3751 6.64332 79.0687 6.11838 80.4879C5.27178 82.7767 4.37045 85.5085 3.53042 88.6292C-7.07427 128.023 8.32698 169.826 41.7753 193.238L94.8459 230.386V230.385Z" fill="#0080BC"/> <path d="M103.571 228.526L167.095 124.003C167.593 123.183 168.751 123.092 169.369 123.825C174.961 130.465 195.796 158.715 170.015 184.463C146.49 207.957 116.526 224.709 105.421 230.498C104.161 231.155 102.834 229.74 103.571 228.526Z" fill="#0080BC"/> <path d="M107.154 0.930762C105.886 0.0433954 104.324 1.5567 105.174 2.84902C119.363 24.4301 166.529 96.2354 173.044 107.014C179.471 117.646 192.11 135.315 193.165 150.432C193.27 151.941 195.357 152.247 195.882 150.828C196.728 148.539 197.63 145.808 198.47 142.687C209.074 103.293 193.673 61.4905 160.225 38.078L107.154 0.930762Z" fill="#0080BC"/></svg></div>
         ${desc ? '<div class="pf-desc">'+esc(desc)+'</div>' : ''}
+        ${location ? '<div class="pf-addr" style="margin-top:10px">\ud83d\udccd '+esc(location)+'</div>' : ''}
         <div class="pf-stats">
           ${following !== null ? '<span class="pf-stat"><b>'+following+'</b> following</span>' : ''}
           ${followers !== null ? '<span class="pf-stat"><b>'+followers+'</b> followers</span>' : ''}
         </div>
         ${links ? '<div class="pf-links">'+links+'</div>' : ''}
         ${ethAddr ? '<div class="pf-addr">resolves to <code>'+ethAddr.slice(0,6)+'…'+ethAddr.slice(-4)+'</code></div>' : ''}
+        <div class="pf-expiry" id="pfExpiry" style="display:none"></div>
         <div class="pf-keptalive" id="pfKeptAlive" style="display:none"></div>
         <div class="pf-share">
           <button id="shareCopy" type="button"><svg viewBox="0 0 24 24" fill="none"><path d="M9 9h10v10H9zM5 15V5h10" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>Copy link</button>
@@ -880,28 +987,24 @@ async function renderProfile(name) {
     <div class="pf-support" id="profExtend">
       <div class="inputView">
         <h3>Keep ${esc(name)} alive</h3>
-        <p class="psub">a few dollars of USDC adds time to this name — paid from any chain, renewed on Ethereum. it adds time, not income.</p>
+        <p class="psub">a few dollars adds time to this name — paid from any chain, renewed on Ethereum.</p>
         <div class="chainsel">
           <div class="chainsel-lbl">Pay with USDC from</div>
           <div class="chainsel-opts">
-            <button type="button" class="chainopt sel" data-chain="arbitrum"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2l9 5v10l-9 5-9-5V7l9-5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>Arbitrum</button>
-            <button type="button" class="chainopt" data-chain="ethereum"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2l6 10-6 4-6-4 6-10z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>Ethereum</button>
-            <button type="button" class="chainopt" data-chain="base"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/></svg>Base</button>
-            <button type="button" class="chainopt" data-chain="polygon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>Polygon</button>
-            <button type="button" class="chainopt" data-chain="optimism"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M8 12h2M14 12h2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>Optimism</button>
+            <button type="button" class="chainopt sel" data-chain="arbitrum"><svg viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg"><g> <path fill="#213147" d="M45.3,152V348c0,12.5,6.6,24,17.5,30.3l169.8,98c10.8,6.2,24.1,6.2,35,0l169.8-98 c10.8-6.2,17.5-17.8,17.5-30.3V152c0-12.5-6.6-24-17.5-30.3l-169.8-98c-10.8-6.2-24.1-6.2-35,0l-169.8,98 C52,127.9,45.3,139.5,45.3,152z"/> <g> <g> <g> <path fill="#12AAFF" d="M287.1,288l-24.2,66.4c-0.7,1.8-0.7,3.9,0,5.7l41.6,114.2l48.2-27.8L294.9,288 C293.6,284.3,288.5,284.3,287.1,288z"/> </g> <g> <path fill="#12AAFF" d="M335.6,176.3c-1.3-3.7-6.4-3.7-7.8,0l-24.2,66.4c-0.7,1.8-0.7,3.9,0,5.7l68.2,187.1l48.2-27.8L335.6,176.3z "/> </g> </g> </g> <path fill="#9DCCED" d="M250,31c1.2,0,2.4,0.3,3.5,0.9L437.2,138c2.1,1.2,3.5,3.5,3.5,5.9V356c0,2.5-1.3,4.7-3.5,5.9L253.5,468.1 c-1,0.6-2.2,0.9-3.5,0.9s-2.4-0.3-3.5-0.9L62.9,362c-2.1-1.2-3.5-3.5-3.5-5.9V143.9c0-2.5,1.3-4.7,3.5-5.9L246.6,31.9 C247.6,31.3,248.9,31,250,31 M250,0c-6.5,0-13.1,1.7-18.9,5.1L47.4,111.2c-11.7,6.7-18.9,19.2-18.9,32.7V356 c0,13.5,7.3,26.1,18.9,32.8l183.7,106.1c5.8,3.4,12.4,5.1,18.9,5.1c6.5,0,13.1-1.7,18.9-5.1l183.7-106.1 c11.8-6.7,18.9-19.2,18.9-32.8V143.9c0-13.5-7.3-26.1-18.9-32.8L269,5.1C263.1,1.7,256.5,0,250,0L250,0z"/> <polygon fill="#213147" points="128.6,435.7 145.5,389.4 179.4,417.7 147.7,446.7 "/> <g> <path fill="#FFFFFF" d="M234.6,128.8H188c-3.5,0-6.6,2.1-7.8,5.4L80.4,407.9l48.2,27.8l109.9-301.4 C239.5,131.6,237.5,128.8,234.6,128.8z"/> <path fill="#FFFFFF" d="M316.1,128.8h-46.5c-3.5,0-6.6,2.1-7.8,5.4l-114,312.5l48.2,27.8L320,134.4 C321,131.6,318.9,128.8,316.1,128.8z"/> </g> </g></svg>Arbitrum</button>
+            <button type="button" class="chainopt" data-chain="ethereum"><svg viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon fill="#2F3030" points="249.982,6.554 397.98,251.112 250.53,188.092 "/> <polygon fill="#828384" points="102.39,251.112 249.982,6.554 250.53,188.092 "/> <polygon fill="#343535" points="249.982,341.285 102.39,251.112 250.53,188.092 "/> <polygon fill="#131313" points="397.98,251.112 250.53,188.092 249.982,341.285 "/> <polygon fill="#2F3030" points="249.982,372.329 397.98,284.597 249.982,493.13 "/> <polygon fill="#828384" points="249.982,372.329 102.39,284.597 249.982,493.13 "/></svg>Ethereum</button>
+            <button type="button" class="chainopt" data-chain="base"><svg viewBox="0 0 1280 1280" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M0,101.12c0-34.64,0-51.95,6.53-65.28,6.25-12.76,16.56-23.07,29.32-29.32C49.17,0,66.48,0,101.12,0h1077.76c34.63,0,51.96,0,65.28,6.53,12.75,6.25,23.06,16.56,29.32,29.32,6.52,13.32,6.52,30.64,6.52,65.28v1077.76c0,34.63,0,51.96-6.52,65.28-6.26,12.75-16.57,23.06-29.32,29.32-13.32,6.52-30.65,6.52-65.28,6.52H101.12c-34.64,0-51.95,0-65.28-6.52-12.76-6.26-23.07-16.57-29.32-29.32-6.53-13.32-6.53-30.65-6.53-65.28V101.12Z" fill="#0052FF"/></svg>Base</button>
+            <button type="button" class="chainopt" data-chain="polygon"><svg viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="#8247E5" d="M377.3,163.9c-9.2-5.4-21.2-5.4-31.4,0l-72,41.7l-48.9,27.2l-72,41.7c-9.2,5.4-21.2,5.4-31.4,0l-57.2-32.6 c-9.2-5.4-15.7-15.4-15.7-26.3v-64.3c0-10.9,5.5-20.8,15.7-26.3l56.3-31.7c9.2-5.4,21.2-5.4,31.4,0l56.3,31.7 c9.2,5.4,15.7,15.4,15.7,26.3v41.7l48.9-28.1v-41.7c0-10.9-5.5-20.8-15.7-26.3L153.1,37.1c-9.2-5.4-21.2-5.4-31.4,0L15.7,96.9 C5.5,102.3,0,112.3,0,123.2v120.5c0,10.9,5.5,20.8,15.7,26.3l106.1,59.8c9.2,5.4,21.2,5.4,31.4,0l72-40.8l48.9-28.1l72-40.8 c9.2-5.4,21.2-5.4,31.4,0l56.3,31.7c9.2,5.4,15.7,15.4,15.7,26.3v64.3c0,10.9-5.5,20.8-15.7,26.3l-56.3,32.6 c-9.2,5.4-21.2,5.4-31.4,0l-56.3-31.7c-9.2-5.4-15.7-15.4-15.7-26.3v-41.7l-48.9,28.1v41.7c0,10.9,5.5,20.8,15.7,26.3l106.1,59.8 c9.2,5.4,21.2,5.4,31.4,0l106.1-59.8c9.2-5.4,15.7-15.4,15.7-26.3V250.9c0-10.9-5.5-20.8-15.7-26.3L377.3,163.9z"/></svg>Polygon</button>
+            <button type="button" class="chainopt" data-chain="optimism"><svg viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="250" cy="250" r="250" fill="#FF0420"/> <path d="M177.133 316.446C162.247 316.446 150.051 312.943 140.544 305.938C131.162 298.808 126.471 288.676 126.471 275.541C126.471 272.789 126.784 269.411 127.409 265.408C129.036 256.402 131.35 245.581 134.352 232.947C142.858 198.547 164.812 181.347 200.213 181.347C209.845 181.347 218.476 182.973 226.107 186.225C233.738 189.352 239.742 194.106 244.12 200.486C248.498 206.74 250.688 214.246 250.688 223.002C250.688 225.629 250.375 228.944 249.749 232.947C247.873 244.08 245.621 254.901 242.994 265.408C238.616 282.546 231.048 295.368 220.29 303.874C209.532 312.255 195.147 316.446 177.133 316.446ZM179.76 289.426C186.766 289.426 192.707 287.362 197.586 283.234C202.59 279.106 206.155 272.789 208.281 264.283C211.158 252.524 213.348 242.266 214.849 233.51C215.349 230.883 215.599 228.194 215.599 225.441C215.599 214.058 209.657 208.366 197.774 208.366C190.768 208.366 184.764 210.43 179.76 214.558C174.882 218.687 171.379 225.004 169.253 233.51C167.001 241.891 164.749 252.149 162.498 264.283C161.997 266.784 161.747 269.411 161.747 272.163C161.747 283.672 167.752 289.426 179.76 289.426Z" fill="white"/> <path d="M259.303 314.57C257.927 314.57 256.863 314.132 256.113 313.256C255.487 312.255 255.3 311.13 255.55 309.879L281.444 187.914C281.694 186.538 282.382 185.412 283.508 184.536C284.634 183.661 285.822 183.223 287.073 183.223H336.985C350.87 183.223 362.003 186.1 370.384 191.854C378.891 197.609 383.144 205.927 383.144 216.81C383.144 219.937 382.769 223.19 382.018 226.567C378.891 240.953 372.574 251.586 363.067 258.466C353.685 265.346 340.8 268.786 324.413 268.786H299.082L290.451 309.879C290.2 311.255 289.512 312.38 288.387 313.256C287.261 314.132 286.072 314.57 284.822 314.57H259.303ZM325.727 242.892C330.98 242.892 335.546 241.453 339.424 238.576C343.427 235.699 346.054 231.571 347.305 226.192C347.68 224.065 347.868 222.189 347.868 220.563C347.868 216.935 346.805 214.183 344.678 212.307C342.551 210.305 338.924 209.305 333.795 209.305H311.278L304.148 242.892H325.727Z" fill="white"/></svg>Optimism</button>
           </div>
           <div class="chain-note" id="chainNote"></div>
         </div>
         <label>How much do you want to chip in?</label>
-        <div class="field"><span class="prefix">$</span><input id="pfAmt" value="5" inputmode="decimal" /><span class="suffix">USDC</span></div>
-        <div class="amts">
-          <button class="amt pfAmtBtn" data-amt="5">$5</button>
-          <button class="amt pfAmtBtn" data-amt="10">$10</button>
-          <button class="amt pfAmtBtn" data-amt="25">$25</button>
-        </div>
+        <div class="field"><span class="prefix">$</span><input id="pfAmt" value="5" inputmode="decimal" /><span class="suffix"><svg class="usdc-mark" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg"><circle fill="#2775CA" cx="250" cy="250" r="248.3"/> <path fill="#FFFFFF" d="M203.4,422.7c0,5.8-4.7,9.1-10.1,7.4C118.1,406,63.8,335.7,63.8,252.5c0-83,54.3-153.4,129.6-177.5 c5.6-1.7,10.1,1.6,10.1,7.4v14.5c0,3.9-2.9,8.3-6.6,9.7c-59.6,21.9-102,79.1-102,145.9c0,66.9,42.5,124,102,145.7 c3.7,1.4,6.6,5.8,6.6,9.7V422.7z"/> <path fill="#FFFFFF" d="M265.5,368.9c0,4.3-3.5,7.8-7.8,7.8h-15.5c-4.3,0-7.8-3.5-7.8-7.8v-24.4c-33.9-4.7-50.4-23.5-54.9-49.5 c-0.8-4.5,2.7-8.3,7.2-8.3h17.7c3.7,0,6.8,2.7,7.6,6.2c3.3,15.3,12.2,27.2,39.4,27.2c20,0,34.3-11.3,34.3-27.9 c0-16.7-8.3-23.1-37.8-27.9c-43.5-5.8-64-19-64-53c0-26.2,20-46.8,50.6-51v-24.1c0-4.3,3.5-7.8,7.8-7.8h15.5c4.3,0,7.8,3.5,7.8,7.8 v24.6c25,4.5,40.9,18.6,46.2,42.3c1,4.5-2.5,8.5-7.2,8.5h-16.3c-3.5,0-6.4-2.3-7.4-5.6c-4.5-14.9-15.1-21.5-33.8-21.5 c-20.6,0-31.2,9.9-31.2,23.9c0,14.7,6,22.1,37.6,26.6c42.7,5.8,64.8,18,64.8,54.3c0,27.5-20.6,49.9-52.6,54.9v24.8H265.5z"/> <path fill="#FFFFFF" d="M306.6,430c-5.6,1.7-10.1-1.6-10.1-7.4v-14.5c0-4.3,2.5-8.3,6.6-9.7c59.4-21.7,102-79,102-145.7 c0-66.9-42.5-124-102-145.7c-3.7-1.4-6.6-5.8-6.6-9.7V82.8c0-5.8,4.7-9.1,10.1-7.4c75.3,23.7,129.6,94.1,129.6,177.1 C436.2,335.7,381.9,406,306.6,430z"/></svg> USDC</span></div>
+        <div class="amts" id="pfAmtsSlot"></div>
         <div class="estimate" id="pfEstimate"></div>
         <button class="cta" id="pfExtendBtn">Keep this name alive</button>
-        <p class="fine">You'll sign a gasless USDC authorization on Arbitrum. We handle the swap, bridge, and Ethereum renewal.</p>
+        <p class="fine" id="pfFine">You'll authorize a gasless x402 payment on Arbitrum.</p>
       </div>
       <div class="tracker trackerView">
         <h3 style="text-align:center;margin-bottom:18px">Keeping it alive…</h3>
@@ -926,16 +1029,35 @@ async function renderProfile(name) {
   // wire the profile support panel (amount estimate + extend)
   const pfAmt = document.getElementById("pfAmt");
   const pfEst = document.getElementById("pfEstimate");
+  function approxHuman(amt) {
+    // rough preview only; exact duration comes from the on-chain Renewed event after payment.
+    const len = [...label].length, perYear = len >= 5 ? 5 : (len === 4 ? 160 : 640);
+    const days = Math.max(0, amt - 0.10) / perYear * 365.25;
+    // For 3-char and 4-char names (expensive), always show days — months would round to zero or mislead.
+    if (len <= 4) {
+      const d = Math.round(days);
+      if (d < 1) return "<b>a little time</b>";
+      return "<b>" + d + " day" + (d === 1 ? "" : "s") + "</b>";
+    }
+    if (days >= 365) { const y = days / 365.25; const yStr = y >= 10 ? Math.round(y) : (Math.abs(y - Math.round(y)) < 0.05 ? Math.round(y) : y.toFixed(1)); return "<b>" + yStr + " year" + (y >= 1.5 ? "s" : "") + "</b>"; }
+    if (days >= 60)  { const m = Math.round(days / 30.44); return "<b>" + m + " months</b>"; }
+    if (days >= 30)  { return "<b>a month</b>"; }
+    if (days >= 14)  { const w = Math.round(days / 7); return "<b>" + w + " weeks</b>"; }
+    if (days >= 1)   { const d = Math.round(days); return "<b>" + d + " day" + (d === 1 ? "" : "s") + "</b>"; }
+    return "<b>a little time</b>";
+  }
   function pfUpdateEstimate() {
     const amt = parseFloat(pfAmt.value);
     if (!amt || amt <= 0) { pfEst.innerHTML = ""; return; }
-    const len = [...label].length, perYear = len >= 5 ? 5 : (len === 4 ? 160 : 640);
-    const years = Math.max(0, amt - 0.10) / perYear;
-    const human = years >= 1 ? "<b>" + years.toFixed(years >= 10 ? 0 : 1) + " year" + (years>=2?"s":"") + "</b>"
-                             : "<b>" + Math.round(years*12) + " month" + (Math.round(years*12)===1?"":"s") + "</b>";
-    pfEst.innerHTML = "$" + amt + " keeps " + esc(name) + " alive for about " + human + " \u2665";
+    pfEst.innerHTML = "$" + amt + " adds about " + approxHuman(amt) + " to " + esc(name) + " \u2665";
   }
   pfAmt.addEventListener("input", () => { document.querySelectorAll(".pfAmtBtn").forEach(a=>a.classList.remove("sel")); pfUpdateEstimate(); });
+  // Dynamic amounts: 5+char=$2/$5/$10, 4char=$5/$15/$25, 3char=$10/$25/$50.
+  const nameLen = [...label].length;
+  const amtTiers = nameLen >= 5 ? [2,5,10] : (nameLen === 4 ? [5,15,25] : [10,25,50]);
+  const amtsSlot = document.getElementById("pfAmtsSlot");
+  if (amtsSlot) amtsSlot.innerHTML = amtTiers.map(a => '<button class="amt pfAmtBtn" data-amt="'+a+'">$'+a+'</button>').join("");
+  pfAmt.value = amtTiers[1];
   document.querySelectorAll(".pfAmtBtn").forEach((el) => { el.onclick = () => {
     pfAmt.value = el.dataset.amt;
     document.querySelectorAll(".pfAmtBtn").forEach(a=>a.classList.remove("sel")); el.classList.add("sel");
@@ -945,13 +1067,24 @@ async function renderProfile(name) {
   // chain selector — UI is multi-chain; dev backend currently settles via Arbitrum only.
   let selectedChain = "arbitrum";
   const chainNote = document.getElementById("chainNote");
-  document.querySelectorAll(".chainopt").forEach((el) => { el.onclick = () => {
+  const pfFine = document.getElementById("pfFine");
+  function applyChainCopy(chainKey) {
+    const lbl = (CHAINS[chainKey] || CHAINS.arbitrum).label;
+    if (pfFine) pfFine.textContent = "You'll authorize a gasless x402 payment on " + lbl + ".";
+    chainNote.textContent = chainKey === "arbitrum" ? "" : "in development — paying from " + lbl + " is coming soon; using Arbitrum for now.";
+  }
+  document.querySelectorAll(".chainopt").forEach((el) => { el.onclick = async () => {
     document.querySelectorAll(".chainopt").forEach(a=>a.classList.remove("sel"));
     el.classList.add("sel");
     selectedChain = el.dataset.chain;
-    // DEV ONLY: non-Arbitrum origins aren't wired in the dev backend yet.
-    chainNote.textContent = selectedChain === "arbitrum" ? "" : "in development — paying from " + el.textContent.trim() + " is coming soon; using Arbitrum for now.";
+    applyChainCopy(selectedChain);
+    // If a wallet is connected, switch its network to match (prod behavior); nav chip updates via chainChanged.
+    if (account && selected && CHAINS[selectedChain]) {
+      try { await selected.provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAINS[selectedChain].hex }] }); }
+      catch (_) {}
+    }
   }; });
+  applyChainCopy("arbitrum");
   document.getElementById("pfExtendBtn").onclick = () => {
     CTX = document.getElementById("profExtend");
     // NOTE: selectedChain is captured for prod; dev /quote + facilitator still use Arbitrum.
@@ -959,7 +1092,9 @@ async function renderProfile(name) {
   };
 
   // ----- viral loop wiring -----
-  const profileUrl = location.origin + location.pathname + "#/" + name;
+  let baseUrl;
+  try { baseUrl = location.href.split("#")[0]; } catch (_) { baseUrl = ""; }
+  const profileUrl = baseUrl + "#/" + name;
   const shareText = "help keep " + name + " alive \ud83c\udf31";
 
   const copyBtn = document.getElementById("shareCopy");
@@ -982,10 +1117,37 @@ async function renderProfile(name) {
 
   // social proof: count this name's renewals from the on-chain Renewed event (best-effort).
   // Honest: counts namepass renewals of THIS name on the helper contract; if none/blocked, invite to be first.
+  loadExpiry(label).catch(() => {});
   loadKeptAlive(label).catch(() => {});
 }
 
 // Counts Renewed events for a label via the mainnet RPC. Best-effort, degrades to a "be first" CTA.
+// Fetch the ENS expiry date from the base registrar on mainnet. Best-effort.
+const ENS_REGISTRAR = "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85";
+async function loadExpiry(label) {
+  const box = document.getElementById("pfExpiry");
+  if (!box || !window.ethers) return;
+  try {
+    const provider = new ethers.JsonRpcProvider(MAINNET_RPC);
+    const labelHash = ethers.keccak256(ethers.toUtf8Bytes(label));
+    const tokenId = BigInt(labelHash);
+    const reg = new ethers.Contract(ENS_REGISTRAR, ["function nameExpires(uint256) view returns (uint256)"], provider);
+    const exp = await reg.nameExpires(tokenId);
+    const expMs = Number(exp) * 1000;
+    if (expMs <= 0) return;
+    const d = new Date(expMs);
+    const now = Date.now();
+    const daysLeft = Math.round((expMs - now) / 86400000);
+    let status;
+    if (daysLeft < 0) status = '<span style="color:var(--red)">expired</span>';
+    else if (daysLeft < 30) status = '<span style="color:var(--red)">' + daysLeft + ' days left</span>';
+    else if (daysLeft < 90) status = '<span style="color:#c57b00">' + daysLeft + ' days left</span>';
+    else status = daysLeft + ' days left';
+    box.style.display = "block";
+    box.innerHTML = "expires <b>" + d.toLocaleDateString("en-GB", {day:"numeric",month:"short",year:"numeric"}) + "</b> \u00b7 " + status;
+  } catch (_) {}
+}
+
 async function loadKeptAlive(label) {
   const box = document.getElementById("pfKeptAlive");
   if (!box || !window.ethers) return;
