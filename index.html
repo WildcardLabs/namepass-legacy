@@ -11,6 +11,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js">
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.23.1/dist/index.umd.js"></script>
+<script src="https://unpkg.com/@base-org/account/dist/base-account.min.js"></script>
 <style>
   :root {
     --paper: #fdfbf7;
@@ -556,7 +557,10 @@
 const ENDPOINT = "https://arbitrum-renew-ens-905612704113.europe-west1.run.app";
 const ARBITRUM_HEX = "0xa4b1";
 const WALLETCONNECT_PROJECT_ID = "30e2ea901580311e378e5fb6eee06ee0";
+const WALLETCONNECT_ICON = "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22512%22%20height%3D%22512%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%233B99FC%22%20d%3D%22M6.685%208.71c2.935-2.813%207.695-2.813%2010.63%200l.353.339a.35.35%200%200%201%200%20.51l-1.208%201.158a.194.194%200%200%201-.266%200l-.486-.466c-2.048-1.963-5.368-1.963-7.416%200l-.52.498a.194.194%200%200%201-.266%200L6.297%209.592a.35.35%200%200%201%200-.51zm13.13%202.396l1.075%201.03a.35.35%200%200%201%200%20.51l-4.85%204.648a.39.39%200%200%201-.531%200l-3.443-3.299a.097.097%200%200%200-.132%200l-3.442%203.3a.39.39%200%200%201-.532%200l-4.85-4.65a.35.35%200%200%201%200-.508l1.076-1.031a.387.387%200%200%201%20.531%200l3.442%203.299a.097.097%200%200%200%20.133%200l3.442-3.3a.387.387%200%200%201%20.532%200l3.442%203.3a.097.097%200%200%200%20.133%200l3.442-3.3a.39.39%200%200%201%20.531%200%22%2F%3E%3C%2Fsvg%3E";
+const BASE_ACCOUNT_ICON = "data:image/svg+xml,%3C%3Fxml%20version%3D%221.0%22%20encoding%3D%22UTF-8%22%3F%3E%0A%3Csvg%20id%3D%22Layer_1%22%20data-name%3D%22Layer%201%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201280%201280%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3Cstyle%3E%0A%20%20%20%20%20%20.cls-1%20%7B%0A%20%20%20%20%20%20%20%20fill%3A%20blue%3B%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%3C%2Fstyle%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M0%2C101.12c0-34.64%2C0-51.95%2C6.53-65.28%2C6.25-12.76%2C16.56-23.07%2C29.32-29.32C49.17%2C0%2C66.48%2C0%2C101.12%2C0h1077.76c34.63%2C0%2C51.96%2C0%2C65.28%2C6.53%2C12.75%2C6.25%2C23.06%2C16.56%2C29.32%2C29.32%2C6.52%2C13.32%2C6.52%2C30.64%2C6.52%2C65.28v1077.76c0%2C34.63%2C0%2C51.96-6.52%2C65.28-6.26%2C12.75-16.57%2C23.06-29.32%2C29.32-13.32%2C6.52-30.65%2C6.52-65.28%2C6.52H101.12c-34.64%2C0-51.95%2C0-65.28-6.52-12.76-6.26-23.07-16.57-29.32-29.32-6.53-13.32-6.53-30.65-6.53-65.28V101.12Z%22%2F%3E%0A%3C%2Fsvg%3E";
 let walletConnectProvider = null;
+let baseAccountProvider = null;
 // Supported origin chains (UI multi-chain; dev backend settles via Arbitrum only).
 const CHAINS = {
   ethereum: { hex: "0x1",    label: "Ethereum" },
@@ -580,6 +584,20 @@ const MAINNET_RPC = "https://ethereum-rpc.publicnode.com";
 const RESOLVIO_REVERSE_API = "https://api.resolvio.xyz/ens/v2/reverse/";
 const RENEWED_ABI = ["event Renewed(bytes32 indexed paymentId, bytes32 indexed labelHash, bytes32 indexed referrer, string label, uint256 duration, uint256 costWei, uint256 ethProvided)"];
 let providers = [], selected = null, account = null;
+function getBaseAccountProvider() {
+  if (baseAccountProvider) return baseAccountProvider;
+  if (!window.createBaseAccountSDK) return null;
+  try {
+    baseAccountProvider = window.createBaseAccountSDK({
+      appName: "namepass",
+      appLogoUrl: window.location.origin + "/favicon.ico",
+      appChainIds: WALLETCONNECT_CHAIN_IDS
+    }).getProvider();
+    return baseAccountProvider;
+  } catch (_) {
+    return null;
+  }
+}
 const shortAddress = (addr) => addr ? addr.slice(0,6) + "\u2026" + addr.slice(-4) : "";
 
 async function getPrimaryName(addr) {
@@ -646,19 +664,30 @@ window.dispatchEvent(new Event("eip6963:requestProvider"));
 function renderWalletList() {
   const list = document.getElementById("walletList"), none = document.getElementById("noWallets");
   list.innerHTML = "";
+
   providers.forEach(({ info, provider }) => {
     const b = document.createElement("button"); b.className = "wbtn";
     b.innerHTML = '<img src="' + info.icon + '" alt=""/> ' + info.name;
     b.onclick = () => connect({ info, provider }); list.appendChild(b);
   });
 
+  const baseProvider = getBaseAccountProvider();
+  if (baseProvider) {
+    const b = document.createElement("button"); b.className = "wbtn";
+    b.innerHTML = '<img src="' + BASE_ACCOUNT_ICON + '" alt=""/> Base Account';
+    b.onclick = () => connect({ info: { uuid: "base-account", name: "Base Account", rdns: "base.org" }, provider: baseProvider });
+    list.appendChild(b);
+  }
+
   // WalletConnect is the fallback for mobile browsers / users without injected wallets.
   // It stays inside the same namepass wallet modal and uses the same selected.provider path.
-  const wc = document.createElement("button");
-  wc.className = "wbtn";
-  wc.innerHTML = '<span style="width:28px;height:28px;display:inline-grid;place-items:center;font-size:21px;flex:0 0 28px">📱</span> WalletConnect';
-  wc.onclick = () => connectWalletConnect();
-  list.appendChild(wc);
+  if (globalThis["@walletconnect/ethereum-provider"]?.EthereumProvider) {
+    const wc = document.createElement("button");
+    wc.className = "wbtn";
+    wc.innerHTML = '<img src="' + WALLETCONNECT_ICON + '" alt=""/> WalletConnect';
+    wc.onclick = () => connectWalletConnect();
+    list.appendChild(wc);
+  }
 
   none.style.display = list.children.length ? "none" : "block";
 }
@@ -688,12 +717,8 @@ async function getWalletConnectProvider() {
   return walletConnectProvider;
 }
 async function connectWalletConnect() {
-  try {
-    const provider = await getWalletConnectProvider();
-    return connect({ info: { name: "WalletConnect", uuid: "walletconnect", rdns: "walletconnect" }, provider, walletConnect: true });
-  } catch (e) {
-    alert("Could not start WalletConnect: " + (e && e.message || e));
-  }
+  const provider = await getWalletConnectProvider();
+  return connect({ info: { name: "WalletConnect", uuid: "walletconnect", rdns: "walletconnect" }, provider, walletConnect: true });
 }
 const openModal = () => { renderWalletList(); document.getElementById("modalBg").classList.add("show"); };
 const closeModal = () => document.getElementById("modalBg").classList.remove("show");
