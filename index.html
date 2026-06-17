@@ -542,98 +542,6 @@
   </div>
 </div><!-- /view-profile -->
 
-<div class="modal-bg" id="modalBg">
-  <div class="modal">
-    <h4>Connect a wallet</h4>
-    <div id="walletList"></div>
-    <button class="wbtn" id="appKitWalletBtn" type="button" style="display:none">More wallets</button>
-    <p id="noWallets" style="display:none">No wallets found. Install MetaMask, Rabby, or another browser wallet and refresh.</p>
-    <button class="x" id="closeModal">cancel</button>
-  </div>
-</div>
-
-<script type="module">
-const REOWN_PROJECT_ID = "30e2ea901580311e378e5fb6eee06ee0";
-let namepassAppKit = null;
-let namepassAppKitProvider = null;
-let namepassAppKitAddress = null;
-
-const worldChain = {
-  id: 480,
-  chainId: 480,
-  caipNetworkId: "eip155:480",
-  name: "World Chain",
-  currency: "ETH",
-  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
-  rpcUrl: "https://worldchain-mainnet.g.alchemy.com/public",
-  blockExplorers: { default: { name: "Worldscan", url: "https://worldscan.org" } },
-  explorerUrl: "https://worldscan.org",
-  chainNamespace: "eip155"
-};
-
-function notifyAppKitConnected() {
-  if (!namepassAppKitProvider || !namepassAppKitAddress) return;
-  if (typeof window.namepassOnAppKitConnect === "function") {
-    window.namepassOnAppKitConnect(namepassAppKitProvider, namepassAppKitAddress);
-  }
-}
-
-const namepassAppKitReady = (async () => {
-  const [appkit, ethersAdapter, networks] = await Promise.all([
-    import("https://esm.sh/@reown/appkit@1.8.20?bundle"),
-    import("https://esm.sh/@reown/appkit-adapter-ethers@1.8.20?bundle"),
-    import("https://esm.sh/@reown/appkit@1.8.20/networks?bundle")
-  ]);
-
-  const { createAppKit } = appkit;
-  const { EthersAdapter } = ethersAdapter;
-  const { mainnet, base, arbitrum, optimism, polygon } = networks;
-
-  namepassAppKit = createAppKit({
-    adapters: [new EthersAdapter()],
-    networks: [mainnet, base, arbitrum, optimism, polygon, worldChain],
-    defaultNetwork: arbitrum,
-    projectId: REOWN_PROJECT_ID,
-    metadata: {
-      name: "namepass",
-      description: "Keep ENS names alive from any chain",
-      url: window.location.origin,
-      icons: [window.location.origin + "/favicon.ico"]
-    },
-    features: {
-      analytics: true,
-      email: false,
-      socials: false,
-      swaps: false,
-      onramp: false
-    },
-    themeMode: "light"
-  });
-
-  namepassAppKit.subscribeProviders((state) => {
-    namepassAppKitProvider = state && state.eip155 ? state.eip155 : null;
-    notifyAppKitConnected();
-  });
-
-  namepassAppKit.subscribeAccount((state) => {
-    namepassAppKitAddress = state && state.address ? state.address : null;
-    notifyAppKitConnected();
-  });
-})();
-
-window.namepassOpenAppKit = async function namepassOpenAppKit() {
-  await namepassAppKitReady;
-  return namepassAppKit.open();
-};
-
-window.namepassDisconnectAppKit = async function namepassDisconnectAppKit() {
-  await namepassAppKitReady;
-  if (namepassAppKit && typeof namepassAppKit.disconnect === "function") {
-    return namepassAppKit.disconnect();
-  }
-};
-</script>
-
 <script>
 const ENDPOINT = "https://arbitrum-renew-ens-905612704113.europe-west1.run.app";
 const ARBITRUM_HEX = "0xa4b1";
@@ -650,7 +558,7 @@ const HEX_TO_CHAIN = Object.fromEntries(Object.entries(CHAINS).map(([k,v]) => [v
 const MAINNET_RPC = "https://ethereum-rpc.publicnode.com";
 const RESOLVIO_REVERSE_API = "https://api.resolvio.xyz/ens/v2/reverse/";
 const RENEWED_ABI = ["event Renewed(bytes32 indexed paymentId, bytes32 indexed labelHash, bytes32 indexed referrer, string label, uint256 duration, uint256 costWei, uint256 ethProvided)"];
-let providers = [], selected = null, account = null;
+let selected = null, account = null;
 const shortAddress = (addr) => addr ? addr.slice(0,6) + "\u2026" + addr.slice(-4) : "";
 
 async function getPrimaryName(addr) {
@@ -709,81 +617,52 @@ async function setConnectButtonAccount(addr) {
     } catch (_) {}
   } catch (_) {}
 }
-function addInjectedProvider(info, provider) {
-  if (!provider) return;
-  const id = info.uuid || info.rdns || info.name;
-  if (!providers.find((p) => (p.info.uuid || p.info.rdns || p.info.name) === id)) {
-    providers.push({ info, provider });
-    renderWalletList();
-  }
+// Reown AppKit owns wallet connection. Keep selected.provider/account as the app's shared wallet state.
+function clearWalletState() {
+  account = null;
+  selected = null;
+  setConnectButtonAccount(null);
 }
-window.addEventListener("eip6963:announceProvider", (e) => {
-  const { info, provider } = e.detail;
-  addInjectedProvider(info, provider);
-});
-window.dispatchEvent(new Event("eip6963:requestProvider"));
-setTimeout(() => {
-  if (!providers.length && window.ethereum) {
-    addInjectedProvider({ uuid: "window.ethereum", name: "Browser wallet", icon: "", rdns: "injected" }, window.ethereum);
-  }
-}, 250);
-function renderWalletList() {
-  const list = document.getElementById("walletList"), none = document.getElementById("noWallets"), more = document.getElementById("appKitWalletBtn");
-  list.innerHTML = "";
-  if (!providers.length) {
-    none.style.display = "block";
-    if (more) more.style.display = "none";
+
+async function switchConnectedWalletToSelectedChain() {
+  if (!selected || !selected.provider) return;
+  const key = (typeof selectedChain !== "undefined" && selectedChain) ? selectedChain : "arbitrum";
+  const chain = CHAINS[key] || CHAINS.arbitrum;
+  if (!chain || !chain.hex) return;
+  try {
+    await selected.provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: chain.hex }] });
+  } catch (_) {}
+}
+
+function setReownProvider(provider) {
+  if (!provider) return;
+  selected = { info: { name: "Reown", rdns: "reown.appkit" }, provider };
+}
+
+async function setReownAccount(addr) {
+  if (!addr) { clearWalletState(); return; }
+  if (account && account.toLowerCase() === addr.toLowerCase()) return;
+  account = addr;
+  setConnectButtonAccount(account);
+  await switchConnectedWalletToSelectedChain();
+}
+
+const connectBtn = document.getElementById("connectBtn");
+connectBtn.addEventListener("click", async () => {
+  if (account) {
+    try { await window.namepassReownDisconnect?.(); } catch (_) {}
+    clearWalletState();
     return;
   }
-  none.style.display = "none";
-  if (more) more.style.display = "flex";
-  providers.forEach(({ info, provider }) => {
-    const b = document.createElement("button"); b.className = "wbtn";
-    b.innerHTML = (info.icon ? '<img src="' + info.icon + '" alt=""/> ' : '') + info.name;
-    b.onclick = () => connect({ info, provider }); list.appendChild(b);
-  });
-}
-const openModal = () => document.getElementById("modalBg").classList.add("show");
-const closeModal = () => document.getElementById("modalBg").classList.remove("show");
-document.getElementById("closeModal").onclick = closeModal;
-document.getElementById("modalBg").onclick = (e) => { if (e.target.id === "modalBg") closeModal(); };
-document.getElementById("appKitWalletBtn").onclick = async () => { closeModal(); await window.namepassOpenAppKit(); };
-document.getElementById("connectBtn").onclick = async () => {
-  if (account) return;
-  if (providers.length) openModal();
-  else await window.namepassOpenAppKit();
-};
-
-async function connect({ info, provider }) {
-  try {
-    const accs = await provider.request({ method: "eth_requestAccounts" });
-    account = accs[0]; selected = { info, provider };
-    try { await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: ARBITRUM_HEX }] }); } catch (_) {}
-    closeModal();
-    setConnectButtonAccount(account);
-    provider.on && provider.on("accountsChanged", (a) => {
-      account = a[0] || null;
-      setConnectButtonAccount(account);
-    });
-  } catch (e) { alert("Could not connect: " + (e && e.message || e)); }
-}
-window.namepassOnAppKitConnect = async function(provider, addr) {
-  if (!provider || !addr) return;
-  account = addr;
-  selected = { info: { uuid: "appkit", name: "WalletConnect", rdns: "reown.appkit" }, provider };
-  try { await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: ARBITRUM_HEX }] }); } catch (_) {}
-  closeModal();
-  setConnectButtonAccount(account);
-};
-// Toggle: if already connected, clicking the button disconnects.
-document.getElementById("connectBtn").addEventListener("click", () => {
-  if (account) {
-    const wasAppKit = selected && selected.info && selected.info.uuid === "appkit";
-    account = null; selected = null;
-    setConnectButtonAccount(null);
-    if (wasAppKit && window.namepassDisconnectAppKit) window.namepassDisconnectAppKit().catch(() => {});
+  if (!window.namepassOpenReown) {
+    alert("Wallet connector is still loading. Please try again in a moment.");
+    return;
   }
+  window.namepassOpenReown();
 });
+
+window.namepassSetReownProvider = setReownProvider;
+window.namepassSetReownAccount = setReownAccount;
 const clean = (n) => { n = (n||"").trim().toLowerCase(); return n.endsWith(".eth") ? n.slice(0,-4) : n; };
 let avatarSeq = 0; // guards against out-of-order async avatar loads
 function setAvatarLetter(lbl) {
@@ -1385,5 +1264,76 @@ window.addEventListener("popstate", route);
 route(); // initial
 
 </script>
+
+<script type="module">
+const REOWN_PROJECT_ID = "30e2ea901580311e378e5fb6eee06ee0";
+let appKitModal = null;
+let appKitProvider = null;
+let lastReownAddress = null;
+
+const worldChain = {
+  id: 480,
+  chainId: 480,
+  caipNetworkId: "eip155:480",
+  name: "World Chain",
+  currency: "ETH",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrl: "https://worldchain-mainnet.g.alchemy.com/public",
+  explorerUrl: "https://worldscan.org",
+  blockExplorers: { default: { name: "Worldscan", url: "https://worldscan.org" } },
+  chainNamespace: "eip155"
+};
+
+try {
+  const [{ createAppKit }, { EthersAdapter }, networks] = await Promise.all([
+    import("https://esm.sh/@reown/appkit@1.8.20?bundle"),
+    import("https://esm.sh/@reown/appkit-adapter-ethers@1.8.20?bundle"),
+    import("https://esm.sh/@reown/appkit@1.8.20/networks?bundle")
+  ]);
+
+  const { mainnet, arbitrum, base, polygon, optimism } = networks;
+
+  appKitModal = createAppKit({
+    adapters: [new EthersAdapter()],
+    networks: [mainnet, arbitrum, base, polygon, optimism, worldChain],
+    defaultNetwork: arbitrum,
+    projectId: REOWN_PROJECT_ID,
+    metadata: {
+      name: "namepass",
+      description: "Keep ENS names alive from any chain",
+      url: window.location.origin || "https://namepass.xyz",
+      icons: [window.location.origin ? window.location.origin + "/favicon.ico" : "https://namepass.xyz/favicon.ico"]
+    },
+    features: {
+      analytics: true,
+      email: false,
+      socials: false,
+      swaps: false,
+      onramp: false
+    },
+    themeMode: "light"
+  });
+
+  appKitModal.subscribeProviders((state) => {
+    appKitProvider = state?.eip155 || null;
+    if (appKitProvider) window.namepassSetReownProvider?.(appKitProvider);
+  });
+
+  appKitModal.subscribeAccount((state) => {
+    const next = state?.address || null;
+    const normalized = next ? next.toLowerCase() : null;
+    if (normalized === lastReownAddress) return;
+    lastReownAddress = normalized;
+    window.namepassSetReownAccount?.(next);
+  });
+
+  window.namepassOpenReown = () => appKitModal.open();
+  window.namepassReownDisconnect = () => appKitModal.disconnect();
+} catch (err) {
+  console.error("Reown AppKit failed to load", err);
+  window.namepassOpenReown = () => alert("Wallet connector failed to load. Please refresh and try again.");
+}
+</script>
+
 </body>
 </html>
