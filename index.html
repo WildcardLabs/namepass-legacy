@@ -442,7 +442,7 @@
 <body>
 <div class="wrap">
   <nav>
-    <a class="brand" href="#" style="text-decoration:none;color:inherit">
+    <a class="brand" href="/" style="text-decoration:none;color:inherit">
       <div class="mark">
         <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
           <path d="M16 3l11 4v8c0 7-4.7 12-11 14.5C9.7 27 5 22 5 15V7l11-4z" stroke="#2d2d2d" stroke-width="2.4" stroke-linejoin="round"/>
@@ -494,7 +494,7 @@
           <div><div class="nc-name" id="namePreview">vitalik.eth</div><div class="nc-state" id="nameState">type a name to preview</div></div>
         </div>
         <div class="nc-desc" id="ncDesc"></div>
-        <a class="nc-foot" id="ncLink" href="#/vitalik.eth"><span class="l">namepass</span><span class="v" id="ncStatus">see page →</span></a>
+        <a class="nc-foot" id="ncLink" href="/vitalik.eth"><span class="l">namepass</span><span class="v" id="ncStatus">see page →</span></a>
         <svg class="doodle-arrow" viewBox="0 0 60 55" fill="none"><path d="M10 8 C 14 27, 26 40, 48 42" stroke="#ff4d4d" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-dasharray="3 5"/><path d="M42 36l8 6-9 5" stroke="#ff4d4d" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
     </div>
@@ -512,9 +512,9 @@
     <div class="search-hint" id="searchHint">type any .eth name to open its page</div>
     <div class="suggests">
       <span class="suggests-lbl">or visit:</span>
-      <a class="suggest" href="#/vitalik.eth">vitalik.eth</a>
-      <a class="suggest" href="#/nick.eth">nick.eth</a>
-      <a class="suggest" href="#/ens.eth">ens.eth</a>
+      <a class="suggest" href="/vitalik.eth">vitalik.eth</a>
+      <a class="suggest" href="/nick.eth">nick.eth</a>
+      <a class="suggest" href="/ens.eth">ens.eth</a>
     </div>
   </div>
 </div>
@@ -535,7 +535,7 @@
 
 <div id="view-profile" class="view">
   <div class="pf-wrap">
-    <a class="pf-back" href="#">&larr; back to namepass</a>
+    <a class="pf-back" href="/">&larr; back to namepass</a>
     <div id="pfBody">
       <div class="pf-loading">loading profile…</div>
     </div>
@@ -729,7 +729,7 @@ function refreshSearchPreview() {
   const ok = [...lbl].length >= 3;
   document.getElementById("nameState").textContent = !lbl ? "type a name to preview" : (ok ? "ready — view the page" : "names need 3+ characters");
   document.getElementById("ncStatus").textContent = (ok || [...shown].length >= 3) ? "see page →" : "—";
-  var ncLink = document.getElementById("ncLink"); if (ncLink) ncLink.href = ok ? "#/" + lbl + ".eth" : ([...shown].length >= 3 ? "#/" + shown + ".eth" : "#find");
+  var ncLink = document.getElementById("ncLink"); if (ncLink) ncLink.href = ok ? profilePath(lbl + ".eth") : ([...shown].length >= 3 ? profilePath(shown + ".eth") : "/");
   const hint = document.getElementById("searchHint");
   if (hint) hint.textContent = !lbl ? "type a name to open its page" : (ok ? "press enter to open " + lbl + ".eth" : "names need at least 3 characters");
   clearTimeout(searchDebounce);
@@ -744,7 +744,7 @@ if (searchInput) {
     e.preventDefault();
     const lbl = clean(searchInput.value);
     if ([...lbl].length < 3) { const h=document.getElementById("searchHint"); if(h) h.textContent="names need at least 3 characters"; return; }
-    location.hash = "#/" + lbl + ".eth";
+    navigateToName(lbl + ".eth");
   });
   refreshSearchPreview();
 }
@@ -901,7 +901,7 @@ function showResult({ label, renewed, pending, partial }) {
   q(".resultSlot").innerHTML = '<div class="result">' + inner + convert + '</div>';
   q(".resultSlot .again").onclick = resetToInput;
   const sy = q(".resultSlot .seeyours");
-  if (sy) sy.onclick = () => { location.hash = "#"; const el=document.getElementById("searchInput"); if (el) { el.focus(); } };
+  if (sy) sy.onclick = () => navigateHome(true);
 }
 function shake() {
   const c = document.getElementById("namecard");
@@ -913,13 +913,52 @@ function shake() {
 const RESOLVIO = "https://api.resolvio.xyz/ens/v2/profile/";
 const EFP = "https://api.ethfollow.xyz/api/v1/users/";
 
-function parseHash() {
-  // "#/vitalik.eth" or "#vitalik.eth" -> "vitalik.eth"; empty -> null (home)
-  let h = (location.hash || "").replace(/^#\/?/, "").trim().toLowerCase();
-  if (!h) return null;
-  if (!h.endsWith(".eth")) h += ".eth";
-  return h;
+function profilePath(name) {
+  let n = String(name || "").trim().toLowerCase();
+  if (!n) return "/";
+  if (!n.endsWith(".eth")) n += ".eth";
+  return "/" + encodeURIComponent(n);
 }
+function parsePath() {
+  // Clean route only: /vitalik.eth -> "vitalik.eth"; / -> null (home)
+  let p = "";
+  try { p = decodeURIComponent(location.pathname || "/"); } catch (_) { p = location.pathname || "/"; }
+  p = p.replace(/^\/+|\/+$/g, "").trim().toLowerCase();
+  if (!p || p === "index.html") return null;
+  if (!p.endsWith(".eth")) p += ".eth";
+  return p;
+}
+function navigateToName(name) {
+  const path = profilePath(name);
+  if (location.pathname === path) route();
+  else { history.pushState({}, "", path); route(); }
+}
+function navigateHome(focusSearch) {
+  if (location.pathname === "/") route();
+  else { history.pushState({}, "", "/"); route(); }
+  if (focusSearch) {
+    setTimeout(() => {
+      const el = document.getElementById("searchInput");
+      if (el) el.focus();
+    }, 0);
+  }
+}
+
+document.addEventListener("click", (e) => {
+  const a = e.target.closest && e.target.closest('a[href^="/"]');
+  if (!a || a.target || a.hasAttribute("download")) return;
+  let url;
+  try { url = new URL(a.href, location.origin); } catch (_) { return; }
+  if (url.origin !== location.origin) return;
+  const path = url.pathname || "/";
+  if (path === "/") {
+    e.preventDefault();
+    navigateHome(false);
+  } else {
+    e.preventDefault();
+    navigateToName(path.replace(/^\/+/, ""));
+  }
+});
 function showView(id) {
   document.querySelectorAll(".view").forEach((v) => v.classList.remove("active"));
   const el = document.getElementById(id); if (el) el.classList.add("active");
@@ -1060,7 +1099,7 @@ async function renderProfile(name) {
         <button class="cta" type="submit">see yours →</button>
       </form>
     </div>
-    <p class="pf-poweredby">every .eth name kept alive with <a href="#">namepass</a></p>`;
+    <p class="pf-poweredby">every .eth name kept alive with <a href="/">namepass</a></p>`;
 
   // wire the profile support panel (amount estimate + extend)
   const pfAmt = document.getElementById("pfAmt");
@@ -1135,8 +1174,8 @@ async function renderProfile(name) {
 
   // ----- viral loop wiring -----
   let baseUrl;
-  try { baseUrl = window.location.href.split("#")[0]; } catch (_) { baseUrl = ""; }
-  const profileUrl = baseUrl + "#/" + name;
+  try { baseUrl = window.location.origin || ""; } catch (_) { baseUrl = ""; }
+  const profileUrl = baseUrl + profilePath(name);
   const shareText = "help keep " + name + " alive \ud83c\udf31";
 
   const copyBtn = document.getElementById("shareCopy");
@@ -1156,9 +1195,7 @@ async function renderProfile(name) {
     e.preventDefault();
     const v = clean(claimInput.value);
     if ([...v].length < 3) { claimInput.focus(); return; }
-    const nextHash = "#/" + v + ".eth";
-    if (window.location.hash === nextHash) route();
-    else window.location.hash = nextHash;
+    navigateToName(v + ".eth");
   });
 
   // social proof: count this name's renewals from the on-chain Renewed event (best-effort).
@@ -1224,11 +1261,11 @@ async function loadKeptAlive(label) {
 }
 
 function route() {
-  const name = parseHash();
+  const name = parsePath();
   if (name) { renderProfile(name); }
   else { showView("view-home"); }
 }
-window.addEventListener("hashchange", route);
+window.addEventListener("popstate", route);
 route(); // initial
 
 </script>
