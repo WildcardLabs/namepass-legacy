@@ -556,6 +556,9 @@ const CHAINS = {
   worldchain: { hex: "0x1e0", label: "World Chain" },
 };
 const HEX_TO_CHAIN = Object.fromEntries(Object.entries(CHAINS).map(([k,v]) => [v.hex, v.label]));
+const CHAIN_KEY_BY_HEX = Object.fromEntries(Object.entries(CHAINS).map(([k,v]) => [v.hex.toLowerCase(), k]));
+const REOWN_NETWORK_KEYS = new Set(["ethereum", "arbitrum", "base", "polygon", "optimism"]);
+let selectedChain = "arbitrum";
 const MAINNET_RPC = "https://ethereum-rpc.publicnode.com";
 const RESOLVIO_REVERSE_API = "https://api.resolvio.xyz/ens/v2/reverse/";
 const RENEWED_ABI = ["event Renewed(bytes32 indexed paymentId, bytes32 indexed labelHash, bytes32 indexed referrer, string label, uint256 duration, uint256 costWei, uint256 ethProvided)"];
@@ -623,18 +626,43 @@ let reownAppKit = null;
 let reownLoading = null;
 let reownLastAddress = null;
 
-const worldChain = {
-  id: 480,
-  chainId: 480,
-  caipNetworkId: "eip155:480",
-  name: "World Chain",
-  currency: "ETH",
-  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
-  rpcUrl: "https://worldchain-mainnet.g.alchemy.com/public",
-  explorerUrl: "https://worldscan.org",
-  blockExplorers: { default: { name: "Worldscan", url: "https://worldscan.org" } },
-  chainNamespace: "eip155"
-};
+function normalizeChainId(chainId) {
+  if (chainId === undefined || chainId === null) return null;
+  if (typeof chainId === "number") return "0x" + chainId.toString(16);
+  if (typeof chainId === "bigint") return "0x" + chainId.toString(16);
+  if (typeof chainId === "string") {
+    if (chainId.startsWith("eip155:")) return "0x" + Number(chainId.slice(7)).toString(16);
+    if (chainId.startsWith("0x")) return chainId.toLowerCase();
+    const n = Number(chainId);
+    return Number.isFinite(n) ? "0x" + n.toString(16) : null;
+  }
+  return null;
+}
+
+function syncChainSelectorFromWallet(chainId) {
+  const hex = normalizeChainId(chainId);
+  const key = hex ? CHAIN_KEY_BY_HEX[hex] : null;
+  if (!key) return;
+  selectedChain = key;
+  document.querySelectorAll(".chainopt").forEach((btn) => btn.classList.toggle("sel", btn.dataset.chain === key));
+  const c = CHAINS[key];
+  const pfFine = document.getElementById("pfFine");
+  const chainNote = document.getElementById("chainNote");
+  if (pfFine && c) pfFine.textContent = "You'll authorize a gasless x402 payment on " + c.label + ".";
+  if (chainNote && c) chainNote.textContent = key === "arbitrum" ? "" : "in development — paying from " + c.label + " is coming soon; using Arbitrum for now.";
+}
+
+let reownWatchedProvider = null;
+function attachReownChainSync(provider) {
+  if (!provider || reownWatchedProvider === provider) return;
+  reownWatchedProvider = provider;
+  if (typeof provider.request === "function") {
+    provider.request({ method: "eth_chainId" }).then(syncChainSelectorFromWallet).catch(() => {});
+  }
+  if (typeof provider.on === "function") {
+    provider.on("chainChanged", syncChainSelectorFromWallet);
+  }
+}
 
 function clearWalletState() {
   account = null;
@@ -657,7 +685,7 @@ async function ensureReownAppKit() {
     const { mainnet, arbitrum, base, polygon, optimism } = networks;
     const appKit = createAppKit({
       adapters: [new EthersAdapter()],
-      networks: [mainnet, arbitrum, base, polygon, optimism, worldChain],
+      networks: [mainnet, arbitrum, base, polygon, optimism],
       defaultNetwork: arbitrum,
       projectId: "30e2ea901580311e378e5fb6eee06ee0",
       metadata: {
@@ -666,19 +694,28 @@ async function ensureReownAppKit() {
         url: window.location.origin || "https://namepass.xyz",
         icons: [window.location.origin ? window.location.origin + "/favicon.ico" : "https://namepass.xyz/favicon.ico"]
       },
+      enableNetworkSwitch: false,
+      enableWalletGuide: false,
+      enableReconnect: false,
+      debug: false,
       features: {
-        analytics: true,
+        analytics: false,
         email: false,
         socials: false,
         swaps: false,
-        onramp: false
+        onramp: false,
+        connectMethodsOrder: ["wallet"],
+        legalCheckbox: false
       },
       themeMode: "light"
     });
 
     appKit.subscribeProviders((state) => {
       const provider = state && state.eip155;
-      if (provider) selected = { info: { name: "Reown", rdns: "reown.appkit" }, provider };
+      if (provider) {
+        selected = { info: { name: "Reown", rdns: "reown.appkit" }, provider };
+        attachReownChainSync(provider);
+      }
     });
 
     appKit.subscribeAccount((state) => {
@@ -1209,7 +1246,6 @@ async function renderProfile(name) {
 
   // Chain selector: build from CHAINS config with colored dots
   const CHAIN_COLORS = { ethereum:"#2F3030", arbitrum:"#12AAFF", base:"#1652F0", polygon:"#8247E5", optimism:"#FF0420", worldchain:"#000" };
-  let selectedChain = "arbitrum";
   const chainSelOpts = document.getElementById("chainSelOpts");
   const chainNote = document.getElementById("chainNote");
   const pfFine = document.getElementById("pfFine");
@@ -1225,7 +1261,7 @@ async function renderProfile(name) {
         selectedChain = key;
         if (pfFine) pfFine.textContent = "You'll authorize a gasless x402 payment on " + c.label + ".";
         chainNote.textContent = key === "arbitrum" ? "" : "in development — paying from " + c.label + " is coming soon; using Arbitrum for now.";
-        if (account && selected && c.hex) {
+        if (account && selected && c.hex && REOWN_NETWORK_KEYS.has(key)) {
           try { await selected.provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: c.hex }] }); } catch (_) {}
         }
       };
