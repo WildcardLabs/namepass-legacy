@@ -54,6 +54,8 @@
     transition: transform .1s, box-shadow .1s, background .1s; }
   .btn:hover { background: var(--red); color: #fff; box-shadow: 2px 2px 0 var(--ink); transform: translate(2px,2px); }
   .btn:active { box-shadow: 0 0 0 var(--ink); transform: translate(4px,4px); }
+  .connect-avatar { width: 24px; height: 24px; border: 2px solid var(--ink); border-radius: 50%; object-fit: cover; margin-right: 8px; background: var(--yellow); flex: 0 0 24px; }
+  #connectBtn.has-avatar { padding-left: 10px; }
 
   /* hero */
   .hero { display: grid; grid-template-columns: 1fr 420px; gap: 48px; align-items: center; padding: 40px 0 60px; }
@@ -570,21 +572,52 @@ async function getPrimaryName(addr) {
   return (j && j.hasReverseRecord && typeof j.name === "string" && j.name.endsWith(".eth")) ? j.name : null;
 }
 
+function setConnectButtonLabel(label, avatarUrl) {
+  const btn = document.getElementById("connectBtn");
+  if (!btn) return;
+  btn.classList.toggle("has-avatar", !!avatarUrl);
+  btn.innerHTML = (avatarUrl ? '<img class="connect-avatar" src="' + esc(avatarUrl) + '" alt="" referrerpolicy="no-referrer" onerror="this.remove();this.closest(\'#connectBtn\')?.classList.remove(\'has-avatar\')">' : '') + '<span>' + esc(label) + '</span>';
+}
+
+function getAvatarFromProfile(profile) {
+  if (!profile) return null;
+  if (typeof profile.avatar === "string" && profile.avatar) return profile.avatar;
+  const texts = Array.isArray(profile.texts) ? profile.texts : [];
+  const avatar = texts.find((t) => t && t.key === "avatar" && t.exists && t.value);
+  return avatar ? avatar.value : null;
+}
+
+async function getProfileAvatar(name) {
+  if (!name) return null;
+  const r = await fetch("https://api.resolvio.xyz/ens/v2/profile/" + encodeURIComponent(name));
+  if (!r.ok) return null;
+  const profile = await r.json();
+  return getAvatarFromProfile(profile);
+}
+
 async function setConnectButtonAccount(addr) {
   const btn = document.getElementById("connectBtn");
   if (!btn) return;
-  if (!addr) { btn.textContent = "Connect wallet"; btn.removeAttribute("title"); return; }
+  if (!addr) { btn.classList.remove("has-avatar"); btn.textContent = "Connect wallet"; btn.removeAttribute("title"); return; }
 
-  btn.textContent = shortAddress(addr);
+  setConnectButtonLabel(shortAddress(addr));
   btn.title = addr;
 
   try {
     const name = await getPrimaryName(addr);
     // Guard against late API responses after account changed/disconnected.
-    if (name && account && account.toLowerCase() === addr.toLowerCase()) {
-      btn.textContent = name;
-      btn.title = addr;
-    }
+    if (!name || !account || account.toLowerCase() !== addr.toLowerCase()) return;
+
+    setConnectButtonLabel(name);
+    btn.title = addr;
+
+    try {
+      const avatar = await getProfileAvatar(name);
+      if (avatar && account && account.toLowerCase() === addr.toLowerCase()) {
+        setConnectButtonLabel(name, avatar);
+        btn.title = addr;
+      }
+    } catch (_) {}
   } catch (_) {}
 }
 window.addEventListener("eip6963:announceProvider", (e) => {
