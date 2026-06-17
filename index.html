@@ -413,6 +413,12 @@
   .pf-claim form { display: flex; gap: 9px; max-width: 380px; margin: 14px auto 0; }
   .pf-claim .field { flex: 1; height: 46px; }
   .pf-claim .cta { width: auto; padding: 0 18px; height: 46px; font-size: 16px; box-shadow: 4px 4px 0 var(--ink); margin: 0; }
+  @media (max-width: 560px) {
+    .pf-claim { padding: 20px 18px; }
+    .pf-claim form { flex-direction: column; max-width: 100%; gap: 10px; }
+    .pf-claim .field { width: 100%; flex: none; }
+    .pf-claim .cta { width: 100%; justify-content: center; }
+  }
   .pf-poweredby { text-align: center; font-size: 13px; color: #9a9a9a; margin: 22px 0 0; }
   .pf-poweredby a { color: #7a7a7a; font-weight: 700; }
 
