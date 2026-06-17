@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Patrick+Hand&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js">
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.23.1/dist/index.umd.js"></script>
 <style>
   :root {
     --paper: #fdfbf7;
@@ -554,6 +555,8 @@
 <script>
 const ENDPOINT = "https://arbitrum-renew-ens-905612704113.europe-west1.run.app";
 const ARBITRUM_HEX = "0xa4b1";
+const WALLETCONNECT_PROJECT_ID = "30e2ea901580311e378e5fb6eee06ee0";
+let walletConnectProvider = null;
 // Supported origin chains (UI multi-chain; dev backend settles via Arbitrum only).
 const CHAINS = {
   ethereum: { hex: "0x1",    label: "Ethereum" },
@@ -564,6 +567,15 @@ const CHAINS = {
   worldchain: { hex: "0x1e0", label: "World Chain" },
 };
 const HEX_TO_CHAIN = Object.fromEntries(Object.entries(CHAINS).map(([k,v]) => [v.hex, v.label]));
+const WALLETCONNECT_CHAIN_IDS = Object.values(CHAINS).map((c) => Number.parseInt(c.hex, 16));
+const WALLETCONNECT_RPC_MAP = {
+  1: "https://ethereum-rpc.publicnode.com",
+  42161: "https://arb1.arbitrum.io/rpc",
+  8453: "https://mainnet.base.org",
+  137: "https://polygon-rpc.com",
+  10: "https://mainnet.optimism.io",
+  480: "https://worldchain-mainnet.g.alchemy.com/public",
+};
 const MAINNET_RPC = "https://ethereum-rpc.publicnode.com";
 const RESOLVIO_REVERSE_API = "https://api.resolvio.xyz/ens/v2/reverse/";
 const RENEWED_ABI = ["event Renewed(bytes32 indexed paymentId, bytes32 indexed labelHash, bytes32 indexed referrer, string label, uint256 duration, uint256 costWei, uint256 ethProvided)"];
@@ -634,23 +646,66 @@ window.dispatchEvent(new Event("eip6963:requestProvider"));
 function renderWalletList() {
   const list = document.getElementById("walletList"), none = document.getElementById("noWallets");
   list.innerHTML = "";
-  if (!providers.length) { none.style.display = "block"; return; }
-  none.style.display = "none";
   providers.forEach(({ info, provider }) => {
     const b = document.createElement("button"); b.className = "wbtn";
     b.innerHTML = '<img src="' + info.icon + '" alt=""/> ' + info.name;
     b.onclick = () => connect({ info, provider }); list.appendChild(b);
   });
+
+  // WalletConnect is the fallback for mobile browsers / users without injected wallets.
+  // It stays inside the same namepass wallet modal and uses the same selected.provider path.
+  const wc = document.createElement("button");
+  wc.className = "wbtn";
+  wc.innerHTML = '<span style="width:28px;height:28px;display:inline-grid;place-items:center;font-size:21px;flex:0 0 28px">📱</span> WalletConnect';
+  wc.onclick = () => connectWalletConnect();
+  list.appendChild(wc);
+
+  none.style.display = list.children.length ? "none" : "block";
 }
-const openModal = () => document.getElementById("modalBg").classList.add("show");
+async function getWalletConnectProvider() {
+  const wcModule = globalThis["@walletconnect/ethereum-provider"];
+  const WCProvider = wcModule && wcModule.EthereumProvider;
+  if (!WCProvider || !WCProvider.init) throw new Error("WalletConnect failed to load");
+
+  if (walletConnectProvider) {
+    try { await walletConnectProvider.disconnect?.(); } catch (_) {}
+    walletConnectProvider = null;
+  }
+
+  walletConnectProvider = await WCProvider.init({
+    projectId: WALLETCONNECT_PROJECT_ID,
+    showQrModal: true,
+    optionalChains: WALLETCONNECT_CHAIN_IDS,
+    rpcMap: WALLETCONNECT_RPC_MAP,
+    metadata: {
+      name: "namepass",
+      description: "Keep ENS names alive from any chain",
+      url: window.location.origin || "https://namepass.xyz",
+      icons: [window.location.origin ? window.location.origin + "/favicon.ico" : "https://namepass.xyz/favicon.ico"],
+    },
+  });
+
+  return walletConnectProvider;
+}
+async function connectWalletConnect() {
+  try {
+    const provider = await getWalletConnectProvider();
+    return connect({ info: { name: "WalletConnect", uuid: "walletconnect", rdns: "walletconnect" }, provider, walletConnect: true });
+  } catch (e) {
+    alert("Could not start WalletConnect: " + (e && e.message || e));
+  }
+}
+const openModal = () => { renderWalletList(); document.getElementById("modalBg").classList.add("show"); };
 const closeModal = () => document.getElementById("modalBg").classList.remove("show");
 document.getElementById("closeModal").onclick = closeModal;
 document.getElementById("modalBg").onclick = (e) => { if (e.target.id === "modalBg") closeModal(); };
 document.getElementById("connectBtn").onclick = () => { if (!account) openModal(); };
 
-async function connect({ info, provider }) {
+async function connect({ info, provider, walletConnect = false }) {
   try {
-    const accs = await provider.request({ method: "eth_requestAccounts" });
+    const accs = walletConnect && provider.enable
+      ? await provider.enable()
+      : await provider.request({ method: "eth_requestAccounts" });
     account = accs[0]; selected = { info, provider };
 
     // Make the UI feel connected as soon as the wallet returns an account.
@@ -660,7 +715,13 @@ async function connect({ info, provider }) {
 
     provider.on && provider.on("accountsChanged", (a) => {
       account = a[0] || null;
+      if (!account && provider === walletConnectProvider) walletConnectProvider = null;
       setConnectButtonAccount(account);
+    });
+    provider.on && provider.on("disconnect", () => {
+      if (provider === walletConnectProvider) walletConnectProvider = null;
+      account = null; selected = null;
+      setConnectButtonAccount(null);
     });
 
     // Best-effort background switch. Do not delay the connected UI on this.
@@ -670,6 +731,7 @@ async function connect({ info, provider }) {
 // Toggle: if already connected, clicking the button disconnects.
 document.getElementById("connectBtn").addEventListener("click", () => {
   if (account) {
+    if (walletConnectProvider) { try { walletConnectProvider.disconnect?.(); } catch (_) {} walletConnectProvider = null; }
     account = null; selected = null;
     setConnectButtonAccount(null);
   }
