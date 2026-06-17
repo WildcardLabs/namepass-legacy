@@ -2,242 +2,174 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>namepass AppKit CDN mobile wallet test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>namepass AppKit ESM test</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
   <style>
-    :root {
-      --paper: #fdfbf7;
-      --ink: #2d2d2d;
-      --red: #ff4d4d;
-      --yellow: #fff9c4;
-      --blue: #2d5da1;
-      --green: #2f9e5e;
-      --muted: #e5e0d8;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: var(--paper);
-      color: var(--ink);
-      display: grid;
-      place-items: center;
-      padding: 24px;
-      background-image: radial-gradient(var(--muted) 1px, transparent 1px);
-      background-size: 24px 24px;
-    }
-    .card {
-      width: min(680px, 100%);
-      background: #fff;
-      border: 3px solid var(--ink);
-      border-radius: 20px;
-      box-shadow: 8px 8px 0 var(--ink);
-      padding: 26px;
-    }
-    h1 { margin: 0 0 6px; font-size: clamp(28px, 5vw, 42px); line-height: 1.05; }
-    p { margin: 8px 0; color: #555; line-height: 1.45; }
-    .row { display: flex; gap: 12px; flex-wrap: wrap; margin: 22px 0; }
-    button {
-      border: 3px solid var(--ink);
-      background: var(--red);
-      color: white;
-      border-radius: 12px;
-      box-shadow: 4px 4px 0 var(--ink);
-      padding: 12px 18px;
-      font-size: 16px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-    button.secondary { background: #fff; color: var(--ink); }
-    button:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--ink); }
-    .status {
-      display: grid;
-      gap: 10px;
-      margin-top: 18px;
-    }
-    .line {
-      border: 2px dashed var(--muted);
-      border-radius: 12px;
-      padding: 10px 12px;
-      background: #fff;
-      overflow-wrap: anywhere;
-    }
-    .line b { display: inline-block; min-width: 92px; }
-    pre {
-      max-height: 260px;
-      overflow: auto;
-      background: #151515;
-      color: #e8e8e8;
-      border-radius: 12px;
-      padding: 14px;
-      font-size: 12px;
-      line-height: 1.45;
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
-    }
-    .ok { color: var(--green); font-weight: 800; }
-    .bad { color: var(--red); font-weight: 800; }
+    :root { color-scheme: light; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body { margin: 0; background: #fdfbf7; color: #222; padding: 24px; }
+    .card { max-width: 720px; margin: 0 auto; background: white; border: 2px solid #222; border-radius: 18px; padding: 22px; box-shadow: 6px 6px 0 #222; }
+    h1 { margin: 0 0 8px; font-size: 26px; }
+    p { color: #555; line-height: 1.45; }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; margin: 18px 0; }
+    button { border: 2px solid #222; background: #ff4d4d; color: white; border-radius: 12px; padding: 12px 16px; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 3px 3px 0 #222; }
+    button.secondary { background: #fff9c4; color: #222; }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+    .grid { display: grid; grid-template-columns: 140px 1fr; gap: 8px 12px; margin-top: 18px; }
+    .label { color: #777; font-weight: 700; }
+    code, pre { background: #f3f0ea; border-radius: 10px; }
+    code { padding: 2px 6px; }
+    pre { padding: 14px; overflow: auto; min-height: 180px; white-space: pre-wrap; }
+    .ok { color: #157f3b; font-weight: 700; }
+    .bad { color: #b42318; font-weight: 700; }
   </style>
 </head>
 <body>
-  <main class="card">
-    <h1>namepass AppKit CDN test</h1>
-    <p>This is a plain single-file HTML test for the pre-bundled Reown AppKit CDN build + ethers v6. Try this on mobile Safari/Chrome and inside wallet browsers.</p>
+  <div class="card">
+    <h1>namepass AppKit ESM test</h1>
+    <p>This version avoids <code>@reown/appkit-cdn</code> named exports and imports the normal AppKit + Ethers adapter through <code>esm.sh</code> with bundling.</p>
 
     <div class="row">
-      <button id="connectBtn">Open AppKit</button>
-      <button id="disconnectBtn" class="secondary">Disconnect</button>
-      <button id="networkBtn" class="secondary">Networks</button>
-      <button id="signBtn" class="secondary">Test sign</button>
+      <button id="openBtn" disabled>Open AppKit</button>
+      <button id="accountBtn" class="secondary" disabled>Account modal</button>
+      <button id="networkBtn" class="secondary" disabled>Network modal</button>
+      <button id="signBtn" class="secondary" disabled>Sign test message</button>
+      <button id="disconnectBtn" class="secondary" disabled>Disconnect</button>
     </div>
 
-    <div class="status">
-      <div class="line"><b>Status:</b> <span id="status">Loading AppKit…</span></div>
-      <div class="line"><b>Address:</b> <span id="address">—</span></div>
-      <div class="line"><b>Chain:</b> <span id="chain">—</span></div>
-      <div class="line"><b>Provider:</b> <span id="provider">—</span></div>
+    <div class="grid">
+      <div class="label">Load</div><div id="loadState">Loading modules…</div>
+      <div class="label">Connected</div><div id="connected">false</div>
+      <div class="label">Address</div><div id="address">—</div>
+      <div class="label">Chain ID</div><div id="chainId">—</div>
+      <div class="label">Provider</div><div id="providerState">—</div>
     </div>
 
-    <h3>Debug log</h3>
+    <h3>Log</h3>
     <pre id="log"></pre>
-  </main>
+  </div>
 
   <script type="module">
-    import { createAppKit, EthersAdapter, mainnet, base, arbitrum, optimism, polygon, worldchain } from 'https://cdn.jsdelivr.net/npm/@reown/appkit-cdn@1.8.20/dist/appkit.js'
-    import { BrowserProvider } from 'https://cdn.jsdelivr.net/npm/ethers@6.13.2/+esm'
+    const projectId = '30e2ea901580311e378e5fb6eee06ee0';
+    const logEl = document.getElementById('log');
+    const loadState = document.getElementById('loadState');
+    const openBtn = document.getElementById('openBtn');
+    const accountBtn = document.getElementById('accountBtn');
+    const networkBtn = document.getElementById('networkBtn');
+    const signBtn = document.getElementById('signBtn');
+    const disconnectBtn = document.getElementById('disconnectBtn');
+    const connectedEl = document.getElementById('connected');
+    const addressEl = document.getElementById('address');
+    const chainIdEl = document.getElementById('chainId');
+    const providerStateEl = document.getElementById('providerState');
 
-    const projectId = '30e2ea901580311e378e5fb6eee06ee0'
-
-    const $ = (id) => document.getElementById(id)
-    const logEl = $('log')
-    const state = { account: null, chainId: null, provider: null, ethersProvider: null }
+    let modal = null;
+    let eip155Provider = null;
+    let currentAddress = null;
 
     function log(...args) {
-      const line = args.map((arg) => {
-        if (typeof arg === 'string') return arg
-        try { return JSON.stringify(arg, null, 2) } catch { return String(arg) }
-      }).join(' ')
-      console.log(...args)
-      logEl.textContent += line + '\n'
-      logEl.scrollTop = logEl.scrollHeight
+      const line = args.map((x) => {
+        if (typeof x === 'string') return x;
+        try { return JSON.stringify(x, null, 2); } catch { return String(x); }
+      }).join(' ');
+      logEl.textContent += line + '\n';
+      console.log(...args);
     }
 
     function short(addr) {
-      return addr ? `${addr.slice(0, 6)}…${addr.slice(-4)}` : '—'
+      return addr ? addr.slice(0, 6) + '…' + addr.slice(-4) : '—';
     }
 
-    function setStatus(text, ok = null) {
-      $('status').innerHTML = ok === true ? `<span class="ok">${text}</span>` : ok === false ? `<span class="bad">${text}</span>` : text
+    function setConnectedState(state = {}) {
+      const isConnected = !!state.isConnected;
+      currentAddress = state.address || null;
+      connectedEl.textContent = String(isConnected);
+      connectedEl.className = isConnected ? 'ok' : 'bad';
+      addressEl.textContent = currentAddress ? `${state.address} (${short(state.address)})` : '—';
+      chainIdEl.textContent = state.chainId ? String(state.chainId) : '—';
+      signBtn.disabled = !isConnected || !eip155Provider;
+      disconnectBtn.disabled = !isConnected;
+      accountBtn.disabled = !isConnected;
+      networkBtn.disabled = false;
     }
 
-    function render() {
-      $('address').textContent = state.account ? `${short(state.account)} (${state.account})` : '—'
-      $('chain').textContent = state.chainId ? String(state.chainId) : '—'
-      $('provider').textContent = state.provider ? 'EIP-1193 provider ready' : '—'
+    try {
+      const [appkit, ethersAdapter, networks] = await Promise.all([
+        import('https://esm.sh/@reown/appkit@1.8.20?bundle'),
+        import('https://esm.sh/@reown/appkit-adapter-ethers@1.8.20?bundle'),
+        import('https://esm.sh/@reown/appkit@1.8.20/networks?bundle')
+      ]);
+
+      const { createAppKit } = appkit;
+      const { EthersAdapter } = ethersAdapter;
+      const { mainnet, base, arbitrum, optimism, polygon } = networks;
+
+      if (!createAppKit) throw new Error('createAppKit was not exported');
+      if (!EthersAdapter) throw new Error('EthersAdapter was not exported');
+
+      const appNetworks = [mainnet, base, arbitrum, optimism, polygon];
+
+      modal = createAppKit({
+        adapters: [new EthersAdapter()],
+        networks: appNetworks,
+        defaultNetwork: base,
+        projectId,
+        metadata: {
+          name: 'namepass',
+          description: 'Keep ENS names alive from any chain',
+          url: window.location.origin,
+          icons: [window.location.origin + '/favicon.ico']
+        },
+        features: {
+          analytics: true,
+          email: false,
+          socials: false,
+          swaps: false,
+          onramp: false
+        },
+        themeMode: 'light'
+      });
+
+      loadState.innerHTML = '<span class="ok">Loaded</span>';
+      openBtn.disabled = false;
+      networkBtn.disabled = false;
+      log('Loaded AppKit modules:', Object.keys(appkit));
+      log('Loaded Ethers adapter exports:', Object.keys(ethersAdapter));
+      log('Loaded network exports include:', Object.keys(networks).slice(0, 20));
+
+      modal.subscribeAccount((state) => {
+        log('account state', state);
+        setConnectedState(state);
+      });
+
+      modal.subscribeProviders((state) => {
+        eip155Provider = state?.eip155 || null;
+        providerStateEl.textContent = eip155Provider ? 'eip155 provider available' : 'no eip155 provider yet';
+        log('providers state', Object.keys(state || {}));
+      });
+
+      openBtn.onclick = () => modal.open();
+      accountBtn.onclick = () => modal.open({ view: 'Account' });
+      networkBtn.onclick = () => modal.open({ view: 'Networks' });
+      disconnectBtn.onclick = () => modal.disconnect();
+
+      signBtn.onclick = async () => {
+        if (!eip155Provider || !currentAddress) return;
+        try {
+          const browserProvider = new ethers.BrowserProvider(eip155Provider);
+          const signer = await browserProvider.getSigner();
+          const sig = await signer.signMessage('namepass AppKit test');
+          log('signature', sig);
+          alert('Signed successfully: ' + sig.slice(0, 18) + '…');
+        } catch (err) {
+          log('sign failed', err?.message || err);
+          alert('Sign failed: ' + (err?.message || err));
+        }
+      };
+    } catch (err) {
+      loadState.innerHTML = '<span class="bad">Failed</span>';
+      log('MODULE LOAD / INIT ERROR:', err?.stack || err?.message || err);
     }
-
-    const metadata = {
-      name: 'namepass',
-      description: 'Keep ENS names alive from any chain',
-      url: window.location.origin,
-      icons: ['https://namepass-sigma.vercel.app/favicon.ico']
-    }
-
-    const networks = [mainnet, base, arbitrum, optimism, polygon, worldchain].filter(Boolean)
-
-    const modal = createAppKit({
-      adapters: [new EthersAdapter()],
-      projectId,
-      networks,
-      defaultNetwork: base,
-      metadata,
-      features: {
-        analytics: false,
-        email: false,
-        socials: []
-      },
-      themeMode: 'light',
-      themeVariables: {
-        '--w3m-accent': '#ff4d4d',
-        '--w3m-border-radius-master': '4px'
-      }
-    })
-
-    // AppKit emits account and provider state through subscriptions.
-    modal.subscribeAccount((accountState) => {
-      log('account state:', accountState)
-
-      const address = accountState?.address || accountState?.allAccounts?.[0]?.address || null
-      const chainId = accountState?.chainId || accountState?.caipAddress?.split(':')?.[1] || null
-
-      state.account = address
-      state.chainId = chainId
-
-      if (address) setStatus('Connected', true)
-      else setStatus('Disconnected')
-
-      render()
-    })
-
-    modal.subscribeProviders((providers) => {
-      log('providers state keys:', Object.keys(providers || {}))
-      const eip155Provider = providers?.eip155
-
-      if (eip155Provider) {
-        state.provider = eip155Provider
-        state.ethersProvider = new BrowserProvider(eip155Provider)
-        log('EIP155 provider ready')
-      } else {
-        state.provider = null
-        state.ethersProvider = null
-      }
-
-      render()
-    })
-
-    $('connectBtn').addEventListener('click', () => {
-      log('opening AppKit connect modal')
-      modal.open()
-    })
-
-    $('networkBtn').addEventListener('click', () => {
-      log('opening AppKit network modal')
-      modal.open({ view: 'Networks' })
-    })
-
-    $('disconnectBtn').addEventListener('click', async () => {
-      log('disconnect requested')
-      try {
-        await modal.disconnect()
-        state.account = null
-        state.chainId = null
-        state.provider = null
-        state.ethersProvider = null
-        setStatus('Disconnected')
-        render()
-      } catch (err) {
-        log('disconnect error:', err?.message || err)
-        setStatus('Disconnect failed', false)
-      }
-    })
-
-    $('signBtn').addEventListener('click', async () => {
-      try {
-        if (!state.ethersProvider) throw new Error('No ethers provider yet')
-        const signer = await state.ethersProvider.getSigner()
-        const sig = await signer.signMessage('namepass AppKit test')
-        log('signature:', sig)
-      } catch (err) {
-        log('sign error:', err?.message || err)
-        setStatus('Sign failed or cancelled', false)
-      }
-    })
-
-    setStatus('AppKit loaded. Tap Open AppKit.', true)
-    render()
-    log('loaded on', window.location.href)
-    log('userAgent:', navigator.userAgent)
   </script>
 </body>
 </html>
