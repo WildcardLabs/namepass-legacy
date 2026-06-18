@@ -206,6 +206,14 @@
   .wbtn img { width: 28px; height: 28px; flex: none; border-radius: 7px; }
   .modal .x { display: block; width: 100%; text-align: center; background: none; border: none; color: #8a8a8a; cursor: pointer; font-family: var(--hand); font-size: 15px; margin-top: 6px; }
 
+  .wallet-account-card { border: 2px solid var(--ink); background: #fff; border-radius: var(--wobbly-sm); box-shadow: 3px 3px 0 var(--ink); padding: 16px; margin-bottom: 12px; text-align: center; }
+  .wallet-account-avatar { width: 58px; height: 58px; border: 3px solid var(--ink); border-radius: var(--wobbly-sm); background: var(--yellow); display: grid; place-items: center; overflow: hidden; margin: 0 auto 10px; font-family: var(--display); font-weight: 700; font-size: 26px; }
+  .wallet-account-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .wallet-account-name { font-family: var(--display); font-weight: 700; font-size: 21px; line-height: 1.1; overflow-wrap: anywhere; }
+  .wallet-account-address { font-size: 13px; color: #777; margin-top: 5px; overflow-wrap: anywhere; }
+  .wallet-account-wallet { font-size: 14px; color: #777; margin-top: 8px; }
+  .wbtn.disconnect { background: #ffe0de; }
+
   @media (max-width: 900px) {
     .hero { grid-template-columns: 1fr; gap: 36px; padding: 24px 0 40px; text-align: center; }
     .hero .lede { margin-left: auto; margin-right: auto; }
@@ -546,7 +554,7 @@
 
 <div class="modal-bg" id="modalBg">
   <div class="modal">
-    <h4>Connect a wallet</h4>
+    <h4 id="walletModalTitle">Connect a wallet</h4>
     <div id="walletList"></div>
     <p id="noWallets" style="display:none">No wallets found. Install MetaMask, Rabby, or another browser wallet and refresh.</p>
     <button class="x" id="closeModal">cancel</button>
@@ -584,6 +592,8 @@ const MAINNET_RPC = "https://ethereum-rpc.publicnode.com";
 const RESOLVIO_REVERSE_API = "https://api.resolvio.xyz/ens/v2/reverse/";
 const RENEWED_ABI = ["event Renewed(bytes32 indexed paymentId, bytes32 indexed labelHash, bytes32 indexed referrer, string label, uint256 duration, uint256 costWei, uint256 ethProvided)"];
 let providers = [], selected = null, account = null;
+let connectedWalletLabel = null;
+let connectedWalletAvatar = null;
 function createFreshBaseAccountProvider() {
   if (!window.createBaseAccountSDK) return null;
   try {
@@ -638,7 +648,14 @@ async function getProfileAvatar(name) {
 async function setConnectButtonAccount(addr) {
   const btn = document.getElementById("connectBtn");
   if (!btn) return;
-  if (!addr) { btn.classList.remove("has-avatar"); btn.textContent = "Connect wallet"; btn.removeAttribute("title"); return; }
+  if (!addr) {
+    connectedWalletLabel = null;
+    connectedWalletAvatar = null;
+    btn.classList.remove("has-avatar");
+    btn.textContent = "Connect wallet";
+    btn.removeAttribute("title");
+    return;
+  }
 
   setConnectButtonLabel(shortAddress(addr));
   btn.title = addr;
@@ -666,6 +683,8 @@ window.addEventListener("eip6963:announceProvider", (e) => {
 });
 window.dispatchEvent(new Event("eip6963:requestProvider"));
 function renderWalletList() {
+  const title = document.getElementById("walletModalTitle");
+  if (title) title.textContent = "Connect a wallet";
   const list = document.getElementById("walletList"), none = document.getElementById("noWallets");
   list.innerHTML = "";
 
@@ -673,9 +692,6 @@ function renderWalletList() {
     const b = document.createElement("button"); b.className = "wbtn";
     b.innerHTML = '<img src="' + info.icon + '" alt=""/> ' + info.name;
     b.onclick = () => {
-      b.disabled = true;
-      b.style.opacity = "0.65";
-      b.innerHTML = '<img src="' + info.icon + '" alt=""/> Connecting...';
       connect({ info, provider });
     }; list.appendChild(b);
   });
@@ -684,9 +700,6 @@ function renderWalletList() {
     const b = document.createElement("button"); b.className = "wbtn";
     b.innerHTML = '<img src="' + BASE_ACCOUNT_ICON + '" alt=""/> Base Account';
     b.onclick = () => {
-      b.disabled = true;
-      b.style.opacity = "0.65";
-      b.innerHTML = '<img src="' + BASE_ACCOUNT_ICON + '" alt=""/> Connecting...';
       connectBaseAccount();
     };
     list.appendChild(b);
@@ -699,9 +712,6 @@ function renderWalletList() {
     wc.className = "wbtn";
     wc.innerHTML = '<img src="' + WALLETCONNECT_ICON + '" alt=""/> WalletConnect';
     wc.onclick = () => {
-      wc.disabled = true;
-      wc.style.opacity = "0.65";
-      wc.innerHTML = '<img src="' + WALLETCONNECT_ICON + '" alt=""/> Connecting...';
       connectWalletConnect();
     };
     list.appendChild(wc);
@@ -768,10 +778,8 @@ async function disconnectCurrentWallet() {
     try { await provider.disconnect?.(); } catch (_) {}
     walletConnectProvider = null;
   } else if (provider && (provider === baseAccountProvider || kind === "base-account" || rdns === "base.org")) {
-    // Base Account can keep SDK/provider-side auth state. Revoke best-effort,
-    // call provider disconnect if exposed, then destroy our cached provider so
-    // the next Base Account click creates a fresh SDK/provider instance.
-    await revokeAccountPermission(provider);
+    // Base Account SDK exposes provider.disconnect(), and its implementation
+    // clears the SDK account/session store. Do this before dropping our reference.
     try { await provider.disconnect?.(); } catch (_) {}
     resetBaseAccountProvider();
   } else if (provider) {
@@ -789,11 +797,40 @@ async function disconnectCurrentWallet() {
   setConnectButtonAccount(null);
   closeModal();
 }
-const openModal = () => { renderWalletList(); document.getElementById("modalBg").classList.add("show"); };
+function renderAccountModal() {
+  const title = document.getElementById("walletModalTitle");
+  const list = document.getElementById("walletList");
+  const none = document.getElementById("noWallets");
+  if (title) title.textContent = "Wallet connected";
+  if (none) none.style.display = "none";
+
+  const label = connectedWalletLabel || shortAddress(account);
+  const walletName = selected?.info?.name || "Wallet";
+  const avatarLetter = esc(((label || account || "?")[0] || "?").toUpperCase());
+  const avatar = connectedWalletAvatar
+    ? '<img src="' + esc(connectedWalletAvatar) + '" alt="" referrerpolicy="no-referrer" onerror="this.remove();">'
+    : avatarLetter;
+
+
+  list.innerHTML =
+    '<div class="wallet-account-card">' +
+      '<div class="wallet-account-avatar">' + avatar + '</div>' +
+      '<div class="wallet-account-name">' + esc(label) + '</div>' +
+      '<div class="wallet-account-address">' + esc(account || "") + '</div>' +
+      '<div class="wallet-account-wallet">Connected with ' + esc(walletName) + '</div>' +
+    '</div>' +
+    '<button class="wbtn disconnect" id="disconnectWalletBtn" type="button">Disconnect</button>';
+
+  document.getElementById("disconnectWalletBtn").onclick = () => disconnectCurrentWallet();
+}
+
+const openWalletModal = () => { renderWalletList(); document.getElementById("modalBg").classList.add("show"); };
+const openAccountModal = () => { renderAccountModal(); document.getElementById("modalBg").classList.add("show"); };
+const openModal = openWalletModal;
 const closeModal = () => document.getElementById("modalBg").classList.remove("show");
 document.getElementById("closeModal").onclick = closeModal;
 document.getElementById("modalBg").onclick = (e) => { if (e.target.id === "modalBg") closeModal(); };
-document.getElementById("connectBtn").onclick = () => { if (!account) openModal(); };
+document.getElementById("connectBtn").onclick = () => { account ? openAccountModal() : openWalletModal(); };
 
 async function connect({ info, provider, kind = "injected" }) {
   try {
@@ -830,10 +867,7 @@ async function connect({ info, provider, kind = "injected" }) {
     });
   } catch (e) { alert("Could not connect: " + (e && e.message || e)); }
 }
-// Toggle: if already connected, clicking the button disconnects and revokes/ends the session when possible.
-document.getElementById("connectBtn").addEventListener("click", () => {
-  if (account) disconnectCurrentWallet();
-});
+// Connected button opens the account modal. Disconnect happens from inside that modal.
 const clean = (n) => { n = (n||"").trim().toLowerCase(); return n.endsWith(".eth") ? n.slice(0,-4) : n; };
 let avatarSeq = 0; // guards against out-of-order async avatar loads
 function setAvatarLetter(lbl) {
