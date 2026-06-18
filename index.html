@@ -561,6 +561,7 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@multiavatar/multiavatar/multiavatar.min.js"></script>
 <script>
 const ENDPOINT = "https://arbitrum-renew-ens-905612704113.europe-west1.run.app";
 const ARBITRUM_HEX = "0xa4b1";
@@ -614,6 +615,28 @@ function resetBaseAccountProvider() {
 }
 const shortAddress = (addr) => addr ? addr.slice(0,6) + "\u2026" + addr.slice(-4) : "";
 
+function getWalletAvatarSeed(label) {
+  return (label && !label.includes("\u2026") ? label : null) || account || label || "namepass";
+}
+
+function getMultiavatarDataUrl(seed) {
+  try {
+    if (typeof window.multiavatar !== "function") return null;
+    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(window.multiavatar(String(seed || "namepass")));
+  } catch (_) {
+    return null;
+  }
+}
+
+function walletAvatarImg(src, label, className) {
+  const fallback = getMultiavatarDataUrl(getWalletAvatarSeed(label));
+  const finalSrc = src || fallback;
+  if (!finalSrc) return "";
+  const cls = className ? ' class="' + esc(className) + '"' : "";
+  const fallbackAttr = fallback ? ' data-fallback-src="' + esc(fallback) + '"' : "";
+  return '<img' + cls + ' src="' + esc(finalSrc) + '"' + fallbackAttr + ' alt="" referrerpolicy="no-referrer" onerror="if(this.dataset.fallbackSrc && this.src !== this.dataset.fallbackSrc){this.src=this.dataset.fallbackSrc}else{this.remove();this.closest(\'#connectBtn\')?.classList.remove(\'has-avatar\')}">';
+}
+
 async function getPrimaryName(addr) {
   if (!addr) return null;
   const r = await fetch(RESOLVIO_REVERSE_API + encodeURIComponent(addr));
@@ -622,11 +645,25 @@ async function getPrimaryName(addr) {
   return (j && j.hasReverseRecord && typeof j.name === "string" && j.name.endsWith(".eth")) ? j.name : null;
 }
 
+function refreshAccountModalIfOpen() {
+  const modal = document.getElementById("modalBg");
+  if (modal && modal.classList.contains("show") && account) renderAccountModal();
+}
+
 function setConnectButtonLabel(label, avatarUrl) {
   const btn = document.getElementById("connectBtn");
   if (!btn) return;
-  btn.classList.toggle("has-avatar", !!avatarUrl);
-  btn.innerHTML = (avatarUrl ? '<img class="connect-avatar" src="' + esc(avatarUrl) + '" alt="" referrerpolicy="no-referrer" onerror="this.remove();this.closest(\'#connectBtn\')?.classList.remove(\'has-avatar\')">' : '') + '<span>' + esc(label) + '</span>';
+  connectedWalletLabel = label || null;
+
+  // ENS avatar wins. If none is available, use a deterministic Multiavatar
+  // generated from the primary name when present, otherwise the address.
+  const avatarImg = account ? walletAvatarImg(avatarUrl, label, "connect-avatar") : "";
+  const multiavatarFallback = account ? getMultiavatarDataUrl(getWalletAvatarSeed(label)) : null;
+  connectedWalletAvatar = avatarUrl || multiavatarFallback || null;
+
+  btn.classList.toggle("has-avatar", !!avatarImg);
+  btn.innerHTML = avatarImg + '<span>' + esc(label) + '</span>';
+  refreshAccountModalIfOpen();
 }
 
 function getAvatarFromProfile(profile) {
@@ -806,15 +843,12 @@ function renderAccountModal() {
 
   const label = connectedWalletLabel || shortAddress(account);
   const walletName = selected?.info?.name || "Wallet";
-  const avatarLetter = esc(((label || account || "?")[0] || "?").toUpperCase());
-  const avatar = connectedWalletAvatar
-    ? '<img src="' + esc(connectedWalletAvatar) + '" alt="" referrerpolicy="no-referrer" onerror="this.remove();">'
-    : avatarLetter;
-
+  const fallbackAvatar = esc(((label || account || "?")[0] || "?").toUpperCase());
+  const avatar = walletAvatarImg(connectedWalletAvatar, label, "") || fallbackAvatar;
 
   list.innerHTML =
     '<div class="wallet-account-card">' +
-      '<div class="wallet-account-avatar">' + avatar + '</div>' +
+      '<div class="wallet-account-avatar" data-fallback="' + fallbackAvatar + '">' + avatar + '</div>' +
       '<div class="wallet-account-name">' + esc(label) + '</div>' +
       '<div class="wallet-account-address">' + esc(account || "") + '</div>' +
       '<div class="wallet-account-wallet">Connected with ' + esc(walletName) + '</div>' +
