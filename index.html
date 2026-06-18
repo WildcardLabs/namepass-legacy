@@ -584,8 +584,7 @@ const MAINNET_RPC = "https://ethereum-rpc.publicnode.com";
 const RESOLVIO_REVERSE_API = "https://api.resolvio.xyz/ens/v2/reverse/";
 const RENEWED_ABI = ["event Renewed(bytes32 indexed paymentId, bytes32 indexed labelHash, bytes32 indexed referrer, string label, uint256 duration, uint256 costWei, uint256 ethProvided)"];
 let providers = [], selected = null, account = null;
-function getBaseAccountProvider() {
-  if (baseAccountProvider) return baseAccountProvider;
+function createFreshBaseAccountProvider() {
   if (!window.createBaseAccountSDK) return null;
   try {
     baseAccountProvider = window.createBaseAccountSDK({
@@ -595,8 +594,13 @@ function getBaseAccountProvider() {
     }).getProvider();
     return baseAccountProvider;
   } catch (_) {
+    baseAccountProvider = null;
     return null;
   }
+}
+
+function resetBaseAccountProvider() {
+  baseAccountProvider = null;
 }
 const shortAddress = (addr) => addr ? addr.slice(0,6) + "\u2026" + addr.slice(-4) : "";
 
@@ -668,14 +672,23 @@ function renderWalletList() {
   providers.forEach(({ info, provider }) => {
     const b = document.createElement("button"); b.className = "wbtn";
     b.innerHTML = '<img src="' + info.icon + '" alt=""/> ' + info.name;
-    b.onclick = () => connect({ info, provider }); list.appendChild(b);
+    b.onclick = () => {
+      b.disabled = true;
+      b.style.opacity = "0.65";
+      b.innerHTML = '<img src="' + info.icon + '" alt=""/> Connecting...';
+      connect({ info, provider });
+    }; list.appendChild(b);
   });
 
-  const baseProvider = getBaseAccountProvider();
-  if (baseProvider) {
+  if (window.createBaseAccountSDK) {
     const b = document.createElement("button"); b.className = "wbtn";
     b.innerHTML = '<img src="' + BASE_ACCOUNT_ICON + '" alt=""/> Base Account';
-    b.onclick = () => connect({ info: { uuid: "base-account", name: "Base Account", rdns: "base.org" }, provider: baseProvider });
+    b.onclick = () => {
+      b.disabled = true;
+      b.style.opacity = "0.65";
+      b.innerHTML = '<img src="' + BASE_ACCOUNT_ICON + '" alt=""/> Connecting...';
+      connectBaseAccount();
+    };
     list.appendChild(b);
   }
 
@@ -685,7 +698,12 @@ function renderWalletList() {
     const wc = document.createElement("button");
     wc.className = "wbtn";
     wc.innerHTML = '<img src="' + WALLETCONNECT_ICON + '" alt=""/> WalletConnect';
-    wc.onclick = () => connectWalletConnect();
+    wc.onclick = () => {
+      wc.disabled = true;
+      wc.style.opacity = "0.65";
+      wc.innerHTML = '<img src="' + WALLETCONNECT_ICON + '" alt=""/> Connecting...';
+      connectWalletConnect();
+    };
     list.appendChild(wc);
   }
 
@@ -718,7 +736,58 @@ async function getWalletConnectProvider() {
 }
 async function connectWalletConnect() {
   const provider = await getWalletConnectProvider();
-  return connect({ info: { name: "WalletConnect", uuid: "walletconnect", rdns: "walletconnect" }, provider, walletConnect: true });
+  return connect({ info: { name: "WalletConnect", uuid: "walletconnect", rdns: "walletconnect" }, provider, kind: "walletconnect" });
+}
+
+async function connectBaseAccount() {
+  resetBaseAccountProvider();
+  const provider = createFreshBaseAccountProvider();
+  if (!provider) { alert("Base Account failed to load. Please refresh and try again."); return; }
+  return connect({ info: { uuid: "base-account", name: "Base Account", rdns: "base.org" }, provider, kind: "base-account" });
+}
+
+async function revokeAccountPermission(provider) {
+  if (!provider || !provider.request) return;
+  try {
+    // Supported by MetaMask and harmlessly ignored by wallets that do not implement it.
+    // This removes the dapp's eth_accounts permission so the next connect asks again.
+    await provider.request({
+      method: "wallet_revokePermissions",
+      params: [{ eth_accounts: {} }],
+    });
+  } catch (_) {}
+}
+
+async function disconnectCurrentWallet() {
+  const provider = selected && selected.provider;
+  const kind = selected && selected.kind;
+  const rdns = selected && selected.info && selected.info.rdns;
+
+  // WalletConnect has a real session. End it so the next connect opens WC again.
+  if (provider && (provider === walletConnectProvider || kind === "walletconnect" || rdns === "walletconnect")) {
+    try { await provider.disconnect?.(); } catch (_) {}
+    walletConnectProvider = null;
+  } else if (provider && (provider === baseAccountProvider || kind === "base-account" || rdns === "base.org")) {
+    // Base Account can keep SDK/provider-side auth state. Revoke best-effort,
+    // call provider disconnect if exposed, then destroy our cached provider so
+    // the next Base Account click creates a fresh SDK/provider instance.
+    await revokeAccountPermission(provider);
+    try { await provider.disconnect?.(); } catch (_) {}
+    resetBaseAccountProvider();
+  } else if (provider) {
+    // Injected wallets do not have a universal dapp-side disconnect.
+    // Best effort: ask the wallet to revoke the dapp account permission.
+    await revokeAccountPermission(provider);
+
+    // Some SDK providers may expose disconnect even though it is not part of EIP-1193.
+    // Call it only after revoke attempt and ignore unsupported errors.
+    try { await provider.disconnect?.(); } catch (_) {}
+  }
+
+  account = null;
+  selected = null;
+  setConnectButtonAccount(null);
+  closeModal();
 }
 const openModal = () => { renderWalletList(); document.getElementById("modalBg").classList.add("show"); };
 const closeModal = () => document.getElementById("modalBg").classList.remove("show");
@@ -726,12 +795,13 @@ document.getElementById("closeModal").onclick = closeModal;
 document.getElementById("modalBg").onclick = (e) => { if (e.target.id === "modalBg") closeModal(); };
 document.getElementById("connectBtn").onclick = () => { if (!account) openModal(); };
 
-async function connect({ info, provider, walletConnect = false }) {
+async function connect({ info, provider, kind = "injected" }) {
   try {
-    const accs = walletConnect && provider.enable
+    const accs = kind === "walletconnect" && provider.enable
       ? await provider.enable()
       : await provider.request({ method: "eth_requestAccounts" });
-    account = accs[0]; selected = { info, provider };
+    account = Array.isArray(accs) ? accs[0] : accs?.accounts?.[0]?.address;
+    selected = { info, provider, kind };
 
     // Make the UI feel connected as soon as the wallet returns an account.
     // Reverse-name/avatar lookup runs after this, and chain switching no longer blocks it.
@@ -741,25 +811,28 @@ async function connect({ info, provider, walletConnect = false }) {
     provider.on && provider.on("accountsChanged", (a) => {
       account = a[0] || null;
       if (!account && provider === walletConnectProvider) walletConnectProvider = null;
+      if (!account && provider === baseAccountProvider) resetBaseAccountProvider();
       setConnectButtonAccount(account);
     });
     provider.on && provider.on("disconnect", () => {
       if (provider === walletConnectProvider) walletConnectProvider = null;
+      if (provider === baseAccountProvider) resetBaseAccountProvider();
       account = null; selected = null;
       setConnectButtonAccount(null);
     });
 
-    // Best-effort background switch. Do not delay the connected UI on this.
-    try { await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: ARBITRUM_HEX }] }); } catch (_) {}
+    // Best-effort background switch. Do not delay the connected UI or its first paint.
+    // Deferring by a frame prevents the wallet switch prompt from racing the modal close / button update.
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: ARBITRUM_HEX }] }).catch(() => {});
+      }, 0);
+    });
   } catch (e) { alert("Could not connect: " + (e && e.message || e)); }
 }
-// Toggle: if already connected, clicking the button disconnects.
+// Toggle: if already connected, clicking the button disconnects and revokes/ends the session when possible.
 document.getElementById("connectBtn").addEventListener("click", () => {
-  if (account) {
-    if (walletConnectProvider) { try { walletConnectProvider.disconnect?.(); } catch (_) {} walletConnectProvider = null; }
-    account = null; selected = null;
-    setConnectButtonAccount(null);
-  }
+  if (account) disconnectCurrentWallet();
 });
 const clean = (n) => { n = (n||"").trim().toLowerCase(); return n.endsWith(".eth") ? n.slice(0,-4) : n; };
 let avatarSeq = 0; // guards against out-of-order async avatar loads
