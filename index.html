@@ -448,17 +448,14 @@
   }
 
 </style>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Crect%20width%3D%2732%27%20height%3D%2732%27%20rx%3D%276%27%20fill%3D%27%23fff9c4%27%2F%3E%3Cpath%20d%3D%27M3%2029V9Q3%204%208%204H11V18L21%204H25Q29%204%2029%209V29H22V14L12%2029Z%27%20fill%3D%27%232d2d2d%27%20transform%3D%27translate(2%2C2)%27%2F%3E%3Cpath%20d%3D%27M3%2029V9Q3%204%208%204H11V18L21%204H25Q29%204%2029%209V29H22V14L12%2029Z%27%20fill%3D%27%23fdfbf7%27%20stroke%3D%27%232d2d2d%27%20stroke-width%3D%271.4%27%20stroke-linejoin%3D%27round%27%2F%3E%3C%2Fsvg%3E">
 </head>
 <body>
 <div class="wrap">
   <nav>
     <a class="brand" href="/" style="text-decoration:none;color:inherit">
       <div class="mark">
-        <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
-          <path d="M16 3l11 4v8c0 7-4.7 12-11 14.5C9.7 27 5 22 5 15V7l11-4z" stroke="#2d2d2d" stroke-width="2.4" stroke-linejoin="round"/>
-          <circle cx="16" cy="13.5" r="3" stroke="#2d2d2d" stroke-width="2.2"/>
-          <path d="M16 16.5v6M13 19.5h6" stroke="#2d2d2d" stroke-width="2.2" stroke-linecap="round"/>
-        </svg>
+        <svg viewBox="-5 -10 110 110" fill="none" aria-hidden="true"><path d="m50 41.668v8.332h-15.504l-5.3281-15.988-5.332 15.988h-15.504v-8.332h9.4961l11.332-33.996 11.344 33.996zm26.164 8.332-5.332 15.992-5.3281-15.992h-15.504v8.332h9.4961l11.34 33.996 11.336-33.996h9.4961v-8.332zm-17.832-16.668h-8.332v8.332h8.332zm-16.664 33.336h8.332v-8.332h-8.332z" fill="#2d2d2d"/></svg>
       </div>
       <div><h1>namepass</h1><p>for names worth keeping</p></div>
     </a>
@@ -563,14 +560,13 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@multiavatar/multiavatar/multiavatar.min.js"></script>
 <script>
-const ENDPOINT = "https://arbitrum-renew-ens-905612704113.europe-west1.run.app";
-const ARBITRUM_HEX = "0xa4b1";
+let selectedChain = "arbitrum";
 const WALLETCONNECT_PROJECT_ID = "30e2ea901580311e378e5fb6eee06ee0";
 const WALLETCONNECT_ICON = "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22512%22%20height%3D%22512%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%233B99FC%22%20d%3D%22M6.685%208.71c2.935-2.813%207.695-2.813%2010.63%200l.353.339a.35.35%200%200%201%200%20.51l-1.208%201.158a.194.194%200%200%201-.266%200l-.486-.466c-2.048-1.963-5.368-1.963-7.416%200l-.52.498a.194.194%200%200%201-.266%200L6.297%209.592a.35.35%200%200%201%200-.51zm13.13%202.396l1.075%201.03a.35.35%200%200%201%200%20.51l-4.85%204.648a.39.39%200%200%201-.531%200l-3.443-3.299a.097.097%200%200%200-.132%200l-3.442%203.3a.39.39%200%200%201-.532%200l-4.85-4.65a.35.35%200%200%201%200-.508l1.076-1.031a.387.387%200%200%201%20.531%200l3.442%203.299a.097.097%200%200%200%20.133%200l3.442-3.3a.387.387%200%200%201%20.532%200l3.442%203.3a.097.097%200%200%200%20.133%200l3.442-3.3a.39.39%200%200%201%20.531%200%22%2F%3E%3C%2Fsvg%3E";
 const BASE_ACCOUNT_ICON = "data:image/svg+xml,%3C%3Fxml%20version%3D%221.0%22%20encoding%3D%22UTF-8%22%3F%3E%0A%3Csvg%20id%3D%22Layer_1%22%20data-name%3D%22Layer%201%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201280%201280%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3Cstyle%3E%0A%20%20%20%20%20%20.cls-1%20%7B%0A%20%20%20%20%20%20%20%20fill%3A%20blue%3B%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%3C%2Fstyle%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M0%2C101.12c0-34.64%2C0-51.95%2C6.53-65.28%2C6.25-12.76%2C16.56-23.07%2C29.32-29.32C49.17%2C0%2C66.48%2C0%2C101.12%2C0h1077.76c34.63%2C0%2C51.96%2C0%2C65.28%2C6.53%2C12.75%2C6.25%2C23.06%2C16.56%2C29.32%2C29.32%2C6.52%2C13.32%2C6.52%2C30.64%2C6.52%2C65.28v1077.76c0%2C34.63%2C0%2C51.96-6.52%2C65.28-6.26%2C12.75-16.57%2C23.06-29.32%2C29.32-13.32%2C6.52-30.65%2C6.52-65.28%2C6.52H101.12c-34.64%2C0-51.95%2C0-65.28-6.52-12.76-6.26-23.07-16.57-29.32-29.32-6.53-13.32-6.53-30.65-6.53-65.28V101.12Z%22%2F%3E%0A%3C%2Fsvg%3E";
 let walletConnectProvider = null;
 let baseAccountProvider = null;
-// Supported origin chains (UI multi-chain; dev backend settles via Arbitrum only).
+// Supported chains shown in the UI.
 const CHAINS = {
   ethereum: { hex: "0x1",    label: "Ethereum" },
   arbitrum: { hex: "0xa4b1", label: "Arbitrum" },
@@ -579,6 +575,32 @@ const CHAINS = {
   optimism: { hex: "0xa",    label: "Optimism" },
   worldchain: { hex: "0x1e0", label: "World Chain" },
 };
+const ORIGIN_CHAINS = {
+  arbitrum: {
+    label: "Arbitrum",
+    hex: "0xa4b1",
+    chainId: 42161,
+    endpoint: "https://arbitrum-renew-ens-905612704113.europe-west1.run.app",
+    usdc: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+    facilitator: "0xd509FcbB3A78b9a2e0856102Ae61e7dE349E5b90",
+    explorerTx: "https://arbiscan.io/tx/",
+  },
+  base: {
+    label: "Base",
+    hex: "0x2105",
+    chainId: 8453,
+    endpoint: "https://base-renew-ens-905612704113.europe-west1.run.app",
+    usdc: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    facilitator: "0x238533C437801d3D5f352F2e107564593921aCe0",
+    explorerTx: "https://basescan.org/tx/",
+  },
+};
+function getOriginChain(chainKey = selectedChain) {
+  return ORIGIN_CHAINS[chainKey] || ORIGIN_CHAINS.arbitrum;
+}
+function isPaymentChain(chainKey) {
+  return !!ORIGIN_CHAINS[chainKey];
+}
 const HEX_TO_CHAIN = Object.fromEntries(Object.entries(CHAINS).map(([k,v]) => [v.hex, v.label]));
 const WALLETCONNECT_CHAIN_IDS = Object.values(CHAINS).map((c) => Number.parseInt(c.hex, 16));
 const WALLETCONNECT_RPC_MAP = {
@@ -590,6 +612,11 @@ const WALLETCONNECT_RPC_MAP = {
   480: "https://worldchain-mainnet.g.alchemy.com/public",
 };
 const MAINNET_RPC = "https://ethereum-rpc.publicnode.com";
+// Across + ENS constants for live estimates
+const ACROSS_SWAP_URL = "https://app.across.to/api/swap/approval";
+const MULTICALL_HANDLER = "0x924a9f036260DdD5808007E1AA95f08eD08aA569";
+const ENS_HELPER_ADDR = "0xf80E70eBC4184850f9fBCDC8De7CB4C86C46abF6";
+const ENS_CONTROLLER = "0xFED6a969AaA60E4961FCD3EBF1A2e8913BABa546";
 const RESOLVIO_REVERSE_API = "https://api.resolvio.xyz/ens/v2/reverse/";
 const RENEWED_ABI = ["event Renewed(bytes32 indexed paymentId, bytes32 indexed labelHash, bytes32 indexed referrer, string label, uint256 duration, uint256 costWei, uint256 ethProvided)"];
 let providers = [], selected = null, account = null;
@@ -896,7 +923,8 @@ async function connect({ info, provider, kind = "injected" }) {
     // Deferring by a frame prevents the wallet switch prompt from racing the modal close / button update.
     requestAnimationFrame(() => {
       setTimeout(() => {
-        provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: ARBITRUM_HEX }] }).catch(() => {});
+        const origin = getOriginChain();
+        provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: origin.hex }] }).catch(() => {});
       }, 0);
     });
   } catch (e) { alert("Could not connect: " + (e && e.message || e)); }
@@ -1059,17 +1087,35 @@ async function waitForRenewed({ ensHelper, paymentId }) {
   }
   return null;
 }
-async function runExtend(lbl, amt) {
+async function switchToOriginChain(origin) {
+  if (!selected || !selected.provider || !origin || !origin.hex) return;
+  try {
+    await selected.provider.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: origin.hex }]
+    });
+  } catch (_) {
+    throw { step: "approve", msg: "Switch your wallet to " + origin.label + " to continue." };
+  }
+}
+function setPayStepTitle(origin) {
+  const el = q('.check[data-step="pay"] .t');
+  if (el && origin && origin.label) el.textContent = "Pay on " + origin.label;
+}
+async function runExtend(lbl, amt, chainKey = selectedChain) {
   lbl = clean(lbl); amt = String(amt).trim();
   if ([...lbl].length < 3) return shake();
   if (!amt || parseFloat(amt) <= 0) return shake();
   if (!account) { openModal(); return; }
+  const origin = getOriginChain(chainKey);
   showTracker();
+  setPayStepTitle(origin);
   let quote, submitOut;
   try {
     advanceTo("approve");
     setStep("approve", "active", "preparing your extension\u2026");
-    const qRes = await fetch(ENDPOINT + "/quote", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ label: lbl, usdcAmount: amt, payer: account }) });
+    await switchToOriginChain(origin);
+    const qRes = await fetch(origin.endpoint + "/quote", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ label: lbl, usdcAmount: amt, payer: account }) });
     quote = await qRes.json();
     if (!qRes.ok) throw { step: "approve", msg: quote.error || ("HTTP " + qRes.status) };
     setDev({ quote });
@@ -1077,20 +1123,20 @@ async function runExtend(lbl, amt) {
     const signature = await selected.provider.request({ method: "eth_signTypedData_v4", params: [account, JSON.stringify(quote.typedData)] });
     setStep("approve", "done", "authorized");
     advanceTo("pay");
-    setStep("pay", "active", "collecting your USDC on Arbitrum\u2026");
+    setStep("pay", "active", "collecting your USDC on " + origin.label + "\u2026");
     const payload = { payer: quote.payer, to: quote.to, value: quote.amount, validAfter: quote.validAfter, validBefore: quote.validBefore, nonce: quote.nonce };
-    const sRes = await fetch(ENDPOINT + "/submit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ paymentPayload: payload, signature, label: lbl }) });
+    const sRes = await fetch(origin.endpoint + "/submit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ paymentPayload: payload, signature, label: lbl }) });
     submitOut = await sRes.json();
     if (!sRes.ok) throw { step: "pay", msg: submitOut.error || ("HTTP " + sRes.status) };
     setDev({ quote, submit: submitOut });
-    const arb = submitOut.txHash ? 'collected \u00b7 <a href="https://arbiscan.io/tx/' + submitOut.txHash + '" target="_blank" rel="noopener">Arbitrum tx</a>' : "collected";
-    setStep("pay", "done", arb);
+    const originTx = submitOut.txHash ? 'collected \u00b7 <a href="' + origin.explorerTx + submitOut.txHash + '" target="_blank" rel="noopener">' + origin.label + ' tx</a>' : "collected";
+    setStep("pay", "done", originTx);
     advanceTo("bridge");
     setStep("bridge", "active", "swapping to ETH and crossing over\u2026");
     if (!submitOut.ensHelper || !submitOut.paymentId) {
       setStep("bridge", "done", "bridged");
       advanceTo("renew"); setStep("renew", "done", "submitted \u2014 the name updates shortly.");
-      return showResult({ label: lbl, partial: true });
+      return showResult({ label: lbl, partial: true, originLabel: origin.label });
     }
     const renewed = await waitForRenewed({ ensHelper: submitOut.ensHelper, paymentId: submitOut.paymentId });
     setStep("bridge", "done", "arrived on Ethereum");
@@ -1098,10 +1144,10 @@ async function runExtend(lbl, amt) {
     if (renewed) {
       setStep("renew", "done", "renewed on Ethereum");
       setDev({ quote, submit: submitOut, renewed });
-      showResult({ label: lbl, renewed });
+      showResult({ label: lbl, renewed, originLabel: origin.label });
     } else {
       setStep("renew", "active", "taking longer than usual \u2014 it may still complete.");
-      showResult({ label: lbl, pending: true });
+      showResult({ label: lbl, pending: true, originLabel: origin.label });
     }
   } catch (e) {
     const step = (e && e.step) || "approve";
@@ -1114,7 +1160,7 @@ async function runExtend(lbl, amt) {
 
 // Home view button delegates to the shared flow using the home inputs.
 
-function showResult({ label, renewed, pending, partial }) {
+function showResult({ label, renewed, pending, partial, originLabel }) {
   let inner;
   if (renewed) {
     const dur = fmtDuration(renewed.duration);
@@ -1123,7 +1169,7 @@ function showResult({ label, renewed, pending, partial }) {
   } else if (pending) {
     inner = "<h4>Almost there…</h4><p>Your payment went through and the renewal is on its way. It usually lands within seconds — it will finish on Ethereum even if you close this page.</p>";
   } else {
-    inner = "<h4>Payment sent \u2665</h4><p>Your USDC was collected on Arbitrum and the renewal is underway.</p>";
+    inner = "<h4>Payment sent \u2665</h4><p>Your USDC was collected on " + esc(originLabel || "the selected chain") + " and the renewal is underway.</p>";
   }
   // post-support: celebrate, then convert the supporter (they're onchain & identity-minded) into a creator.
   const convert = renewed
@@ -1214,6 +1260,96 @@ function esc(str) { return String(str).replace(/[&<>"]/g, (c) => ({"&":"&amp;","
 function txt(profile, key) {
   const t = (profile.texts || []).find((x) => x.key === key);
   return t && t.exists ? t.value : null;
+}
+
+// ---- Live estimate: Across output + ENS rentPrice ----
+let estimateCache = {};
+let estimateAbort = null;
+
+async function fetchAcrossOutput(usdcMicros, label, chainKey = selectedChain) {
+  const origin = getOriginChain(chainKey);
+  const cacheKey = "across_" + chainKey + "_" + label + "_" + usdcMicros.toString();
+  if (estimateCache[cacheKey]) return estimateCache[cacheKey];
+  const params = new URLSearchParams({
+    tradeType: "exactInput",
+    amount: String(usdcMicros),
+    inputToken: origin.usdc,
+    originChainId: String(origin.chainId),
+    outputToken: "0x0000000000000000000000000000000000000000",
+    destinationChainId: "1",
+    depositor: origin.facilitator,
+    recipient: MULTICALL_HANDLER,
+  });
+  const body = { actions: [{
+    target: ENS_HELPER_ADDR,
+    functionSignature: "function renewHelper(string,bytes32)",
+    args: [
+      { value: label, populateDynamically: false },
+      { value: "0x" + "00".repeat(32), populateDynamically: false },
+    ],
+    value: "0", isNativeTransfer: false, populateCallValueDynamically: true,
+  }] };
+  const res = await fetch(ACROSS_SWAP_URL + "?" + params.toString(), {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error("Across " + res.status);
+  const data = await res.json();
+  const expected = BigInt(data.expectedOutputAmount);
+  estimateCache[cacheKey] = expected;
+  return expected;
+}
+
+async function fetchRentPricePerDay(label) {
+  const cacheKey = "rent_" + label;
+  if (estimateCache[cacheKey]) return estimateCache[cacheKey];
+  const provider = new ethers.JsonRpcProvider(MAINNET_RPC);
+  const ctrl = new ethers.Contract(ENS_CONTROLLER,
+    ["function rentPrice(string,uint256) view returns (tuple(uint256 base, uint256 premium))"], provider);
+  const price = await ctrl.rentPrice(label, 86400);
+  estimateCache[cacheKey] = price.base;
+  return price.base;
+}
+
+async function getLiveEstimate(label, usdcAmount, chainKey = selectedChain) {
+  const usdcMicros = BigInt(Math.round(usdcAmount * 1e6));
+  if (usdcMicros <= 0n) return null;
+  const [ethOut, pricePerDay] = await Promise.all([
+    fetchAcrossOutput(usdcMicros, label, chainKey),
+    fetchRentPricePerDay(label),
+  ]);
+  if (pricePerDay <= 0n) return null;
+  const days = Number(ethOut * 10000n / pricePerDay) / 10000;
+  return Math.max(0, days);
+}
+
+function formatDays(totalDays) {
+  const d = Math.round(totalDays);
+  if (d < 1) return "<b>less than a day</b>";
+  if (d < 7) return "<b>" + d + " day" + (d === 1 ? "" : "s") + "</b>";
+  // Always show two units with days included, unless remainder is 0
+  if (d >= 365) {
+    const y = Math.floor(d / 365);
+    const rem = d - y * 365;
+    const yStr = y + " year" + (y === 1 ? "" : "s");
+    return rem > 0 ? "<b>" + yStr + " and " + rem + " day" + (rem === 1 ? "" : "s") + "</b>"
+                   : "<b>" + yStr + "</b>";
+  }
+  if (d >= 30) {
+    const m = Math.floor(d / 30);
+    const rem = d - m * 30;
+    const mStr = m + " month" + (m === 1 ? "" : "s");
+    return rem > 0 ? "<b>" + mStr + " and " + rem + " day" + (rem === 1 ? "" : "s") + "</b>"
+                   : "<b>" + mStr + "</b>";
+  }
+  if (d >= 7) {
+    const w = Math.floor(d / 7);
+    const rem = d - w * 7;
+    const wStr = w + " week" + (w === 1 ? "" : "s");
+    return rem > 0 ? "<b>" + wStr + " and " + rem + " day" + (rem === 1 ? "" : "s") + "</b>"
+                   : "<b>" + wStr + "</b>";
+  }
+  return "<b>" + d + " day" + (d === 1 ? "" : "s") + "</b>";
 }
 
 async function renderProfile(name) {
@@ -1338,27 +1474,27 @@ async function renderProfile(name) {
   // wire the profile support panel (amount estimate + extend)
   const pfAmt = document.getElementById("pfAmt");
   const pfEst = document.getElementById("pfEstimate");
-  function approxHuman(amt) {
-    // rough preview only; exact duration comes from the on-chain Renewed event after payment.
-    const len = [...label].length, perYear = len >= 5 ? 5 : (len === 4 ? 160 : 640);
-    const days = Math.max(0, amt - 0.10) / perYear * 365.25;
-    // For 3-char and 4-char names (expensive), always show days — months would round to zero or mislead.
-    if (len <= 4) {
-      const d = Math.round(days);
-      if (d < 1) return "<b>a little time</b>";
-      return "<b>" + d + " day" + (d === 1 ? "" : "s") + "</b>";
-    }
-    if (days >= 365) { const y = days / 365.25; const yStr = y >= 10 ? Math.round(y) : (Math.abs(y - Math.round(y)) < 0.05 ? Math.round(y) : y.toFixed(1)); return "<b>" + yStr + " year" + (y >= 1.5 ? "s" : "") + "</b>"; }
-    if (days >= 60)  { const m = Math.round(days / 30.44); return "<b>" + m + " months</b>"; }
-    if (days >= 30)  { return "<b>a month</b>"; }
-    if (days >= 14)  { const w = Math.round(days / 7); return "<b>" + w + " weeks</b>"; }
-    if (days >= 1)   { const d = Math.round(days); return "<b>" + d + " day" + (d === 1 ? "" : "s") + "</b>"; }
-    return "<b>a little time</b>";
-  }
+  let estimateTimer = null;
   function pfUpdateEstimate() {
     const amt = parseFloat(pfAmt.value);
     if (!amt || amt <= 0) { pfEst.innerHTML = ""; return; }
-    pfEst.innerHTML = "$" + amt + " adds about " + approxHuman(amt) + " to " + esc(name) + " \u2665";
+    // Show quick rough estimate immediately, then replace with live data
+    const len = [...label].length, perYear = len >= 5 ? 5 : (len === 4 ? 160 : 640);
+    const roughDays = Math.max(0, amt - 0.05) / perYear * 365.25;
+    pfEst.innerHTML = "$" + amt + " adds about " + formatDays(roughDays) + " to " + esc(name) + " \u2665";
+    // Debounced live estimate from Across + ENS
+    clearTimeout(estimateTimer);
+    estimateTimer = setTimeout(async () => {
+      try {
+        pfEst.style.opacity = "0.6";
+        const chainKey = selectedChain;
+        const days = await getLiveEstimate(label, amt, chainKey);
+        if (days !== null && parseFloat(pfAmt.value) === amt && selectedChain === chainKey) {
+          pfEst.innerHTML = "$" + amt + " adds about " + formatDays(days) + " to " + esc(name) + " \u2665";
+        }
+      } catch (e) { console.warn("live estimate failed:", e); }
+      finally { pfEst.style.opacity = "1"; }
+    }, 600);
   }
   pfAmt.addEventListener("input", () => { document.querySelectorAll(".pfAmtBtn").forEach(a=>a.classList.remove("sel")); pfUpdateEstimate(); });
   // Dynamic amounts: 5+char=$2/$5/$10, 4char=$5/$15/$25, 3char=$10/$25/$50.
@@ -1376,24 +1512,32 @@ async function renderProfile(name) {
 
   // Chain selector: build from CHAINS config with colored dots
   const CHAIN_COLORS = { ethereum:"#2F3030", arbitrum:"#12AAFF", base:"#1652F0", polygon:"#8247E5", optimism:"#FF0420", worldchain:"#000" };
-  let selectedChain = "arbitrum";
   const chainSelOpts = document.getElementById("chainSelOpts");
   const chainNote = document.getElementById("chainNote");
   const pfFine = document.getElementById("pfFine");
+  selectedChain = isPaymentChain(selectedChain) ? selectedChain : "arbitrum";
+  if (pfFine) pfFine.textContent = "You'll authorize a gasless x402 payment on " + getOriginChain().label + ".";
   if (chainSelOpts) {
     Object.entries(CHAINS).forEach(([key, c]) => {
       const btn = document.createElement("button");
-      btn.type = "button"; btn.className = "chainopt" + (key === "arbitrum" ? " sel" : "");
+      btn.type = "button"; btn.className = "chainopt" + (key === selectedChain ? " sel" : "");
       btn.dataset.chain = key;
       btn.innerHTML = '<span class="cdot" style="background:' + (CHAIN_COLORS[key]||"#888") + '"></span>' + c.label;
       btn.onclick = async () => {
+        if (!isPaymentChain(key)) {
+          if (chainNote) chainNote.textContent = "in development — paying from " + c.label + " is coming soon.";
+          return;
+        }
         document.querySelectorAll(".chainopt").forEach(a => a.classList.remove("sel"));
         btn.classList.add("sel");
         selectedChain = key;
-        if (pfFine) pfFine.textContent = "You'll authorize a gasless x402 payment on " + c.label + ".";
-        chainNote.textContent = key === "arbitrum" ? "" : "in development — paying from " + c.label + " is coming soon; using Arbitrum for now.";
-        if (account && selected && c.hex) {
-          try { await selected.provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: c.hex }] }); } catch (_) {}
+        const origin = getOriginChain(key);
+        if (pfFine) pfFine.textContent = "You'll authorize a gasless x402 payment on " + origin.label + ".";
+        if (chainNote) chainNote.textContent = "";
+        setPayStepTitle(origin);
+        pfUpdateEstimate();
+        if (account && selected && origin.hex) {
+          try { await selected.provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: origin.hex }] }); } catch (_) {}
         }
       };
       chainSelOpts.appendChild(btn);
@@ -1402,8 +1546,7 @@ async function renderProfile(name) {
 
   document.getElementById("pfExtendBtn").onclick = () => {
     CTX = document.getElementById("profExtend");
-    // NOTE: selectedChain is captured for prod; dev /quote + facilitator still use Arbitrum.
-    runExtend(label, pfAmt.value);
+    runExtend(label, pfAmt.value, selectedChain);
   };
 
   // ----- viral loop wiring -----
