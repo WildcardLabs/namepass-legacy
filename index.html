@@ -616,7 +616,11 @@ const MAINNET_RPC = "https://ethereum-rpc.publicnode.com";
 const ACROSS_SWAP_URL = "https://app.across.to/api/swap/approval";
 const MULTICALL_HANDLER = "0x924a9f036260DdD5808007E1AA95f08eD08aA569";
 const ENS_HELPER_ADDR = "0xf80E70eBC4184850f9fBCDC8De7CB4C86C46abF6";
-const ENS_CONTROLLER = "0xFED6a969AaA60E4961FCD3EBF1A2e8913BABa546";
+const CHAINLINK_ETH_USD = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419";
+// ENS StablePriceOracle base prices in attoUSD per second. Same constants used by EnsRenewalHelper.
+const PRICE_PER_SEC_3 = 20294266869609n;
+const PRICE_PER_SEC_4 = 5073566717402n;
+const PRICE_PER_SEC_5 = 158548959919n;
 const RESOLVIO_REVERSE_API = "https://api.resolvio.xyz/ens/v2/reverse/";
 const RENEWED_ABI = ["event Renewed(bytes32 indexed paymentId, bytes32 indexed labelHash, bytes32 indexed referrer, string label, uint256 duration, uint256 costWei, uint256 ethProvided)"];
 let providers = [], selected = null, account = null;
@@ -1262,7 +1266,7 @@ function txt(profile, key) {
   return t && t.exists ? t.value : null;
 }
 
-// ---- Live estimate: Across output + ENS rentPrice ----
+// ---- Live estimate: Across output + hardcoded ENS price table ----
 let estimateCache = {};
 let estimateAbort = null;
 
@@ -1300,26 +1304,55 @@ async function fetchAcrossOutput(usdcMicros, label, chainKey = selectedChain) {
   return expected;
 }
 
-async function fetchRentPricePerDay(label) {
-  const cacheKey = "rent_" + label;
-  if (estimateCache[cacheKey]) return estimateCache[cacheKey];
+function ensUtf8Strlen(s) {
+  const bytes = new TextEncoder().encode(String(s || ""));
+  let len = 0;
+  let i = 0;
+  while (i < bytes.length) {
+    const b = bytes[i];
+    if (b < 0x80) i += 1;
+    else if (b < 0xe0) i += 2;
+    else if (b < 0xf0) i += 3;
+    else if (b < 0xf8) i += 4;
+    else if (b < 0xfc) i += 5;
+    else i += 6;
+    len++;
+  }
+  return len;
+}
+
+function pricePerSecAttoUsdForLabel(label) {
+  const len = ensUtf8Strlen(label);
+  if (len < 3) return 0n;
+  return len >= 5 ? PRICE_PER_SEC_5 : (len === 4 ? PRICE_PER_SEC_4 : PRICE_PER_SEC_3);
+}
+
+async function fetchEthUsdAnswer() {
+  const cacheKey = "chainlink_eth_usd";
+  const cached = estimateCache[cacheKey];
+  const now = Date.now();
+  if (cached && now - cached.t < 30000) return cached.v;
   const provider = new ethers.JsonRpcProvider(MAINNET_RPC);
-  const ctrl = new ethers.Contract(ENS_CONTROLLER,
-    ["function rentPrice(string,uint256) view returns (tuple(uint256 base, uint256 premium))"], provider);
-  const price = await ctrl.rentPrice(label, 86400);
-  estimateCache[cacheKey] = price.base;
-  return price.base;
+  const oracle = new ethers.Contract(CHAINLINK_ETH_USD, ["function latestAnswer() view returns (int256)"], provider);
+  const answer = BigInt(await oracle.latestAnswer());
+  if (answer <= 0n) throw new Error("Chainlink ETH/USD oracle returned non-positive price");
+  estimateCache[cacheKey] = { v: answer, t: now };
+  return answer;
 }
 
 async function getLiveEstimate(label, usdcAmount, chainKey = selectedChain) {
   const usdcMicros = BigInt(Math.round(usdcAmount * 1e6));
   if (usdcMicros <= 0n) return null;
-  const [ethOut, pricePerDay] = await Promise.all([
+  const pricePerSecAttoUsd = pricePerSecAttoUsdForLabel(label);
+  if (pricePerSecAttoUsd <= 0n) return null;
+  const [ethOut, ethUsdAnswer] = await Promise.all([
     fetchAcrossOutput(usdcMicros, label, chainKey),
-    fetchRentPricePerDay(label),
+    fetchEthUsdAnswer(),
   ]);
-  if (pricePerDay <= 0n) return null;
-  const days = Number(ethOut * 10000n / pricePerDay) / 10000;
+  // Same inverse calculation as EnsRenewalHelper:
+  // duration = (ethAvailableWei * ethUsdAnswer8Decimals) / (pricePerSecAttoUsd * 1e8)
+  const durationSeconds = (ethOut * ethUsdAnswer) / (pricePerSecAttoUsd * 100000000n);
+  const days = Number(durationSeconds * 10000n / 86400n) / 10000;
   return Math.max(0, days);
 }
 
